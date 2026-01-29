@@ -1,0 +1,17 @@
+{
+    "name": "timetracker-root",
+    "version": "1.0.0",
+    "description": "Root configuration for TimeTracker project",
+    "main": "index.js",
+    "scripts": {
+        "server": "npm start --prefix server",
+        "client": "npm run dev --prefix client",
+        "dev": "concurrently \"npm run server\" \"npm run client\""
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "concurrently": "^8.2.2"
+    }
+}
