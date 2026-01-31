@@ -196,7 +196,6 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn, user, handleDrawerToggle }) => {
                 background: "linear-gradient(90deg, #0000FF 0%, #FF0000 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
-                filter: "drop-shadow(2px 2px 4px rgba(255, 0, 0, 0.5))",
                 cursor: "pointer",
               }}
             >

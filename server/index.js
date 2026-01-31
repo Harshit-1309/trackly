@@ -7,13 +7,22 @@ const session = require("express-session");
 const MongoStoreOriginal = require("connect-mongo");
 const MongoStore = (typeof MongoStoreOriginal.create === 'function') ? MongoStoreOriginal : MongoStoreOriginal.default;
 const crypto = require("crypto");
+const path = require("path");
+const helmet = require("helmet");
+const compression = require("compression");
+const morgan = require("morgan");
 const UserModel = require("./model/User");
 
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, ".env") });
 
 const app = express();
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(helmet({
+    contentSecurityPolicy: false, // Turn off for now to avoid breaking existing setups
+}));
+app.use(compression());
+app.use(morgan("combined")); // Standard production logging
 
 mongoose
     .connect(process.env.MONGO_URI)
@@ -39,7 +48,7 @@ mongoose
 
 app.use(
     cors({
-        origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
+        origin: process.env.CLIENT_URL ? process.env.CLIENT_URL.split(',') : ["http://localhost:5173", "http://127.0.0.1:5173"],
         credentials: true,
     })
 );
@@ -56,7 +65,7 @@ app.use(session({
     cookie: { 
         maxAge: 24 * 60 * 60 * 1000,
         httpOnly: true,
-        secure: false, 
+        secure: process.env.NODE_ENV === "production", // Enable secure in production
         sameSite: 'lax',
         path: '/'
     }
@@ -353,6 +362,8 @@ app.post("/customers", async (req, res) => {
             address,
             channelPartnerName,
             phone,
+            billingEmail,
+            country,
         } = req.body;
 
         // Auto-generate customerId if not provided (random 5-digit)
@@ -375,6 +386,8 @@ app.post("/customers", async (req, res) => {
             address,
             channelPartnerName,
             phone,
+            billingEmail,
+            country,
         });
         await newCustomer.save();
         res.status(201).json(newCustomer);
@@ -402,10 +415,12 @@ app.put("/customers/:id", async (req, res) => {
             address,
             channelPartnerName,
             phone,
+            billingEmail,
+            country,
         } = req.body;
         const updatedCustomer = await CustomerModel.findByIdAndUpdate(
             id,
-            { customerId, name, email, address, channelPartnerName, phone },
+            { customerId, name, email, address, channelPartnerName, phone, billingEmail, country },
             { new: true }
         );
         res.json(updatedCustomer);
@@ -751,3 +766,16 @@ app.delete("/tasks/:id", authenticate, async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+
+// Production: Serve static files and catch-all for React routing
+if (process.env.NODE_ENV === "production" || process.env.SERVE_STATIC === "true") {
+    const buildPath = path.join(__dirname, "../client/dist");
+    app.use(express.static(buildPath));
+    app.get("*", (req, res) => {
+        if (!req.url.startsWith("/api")) { // Basic check to not consume API calls
+            res.sendFile(path.join(buildPath, "index.html"));
+        } else {
+            res.status(404).json({ error: "API route not found" });
+        }
+    });
+}

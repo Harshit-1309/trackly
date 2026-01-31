@@ -111,9 +111,11 @@ const ManagementSections = ({
                                 <tr style={{ borderBottom: "1px solid #ddd" }}>
                                     <th style={{ textAlign: "left", padding: "8px" }}>ID</th>
                                     <th style={{ textAlign: "left", padding: "8px" }}>Name</th>
+                                    <th style={{ textAlign: "left", padding: "8px" }}>Billing Email</th>
+                                    <th style={{ textAlign: "left", padding: "8px" }}>Country</th>
                                     <th style={{ textAlign: "left", padding: "8px" }}>Email</th>
                                     <th style={{ textAlign: "left", padding: "8px" }}>Address</th>
-                                    <th style={{ textAlign: "left", padding: "8px" }}>Channel Partner Name</th>
+                                    <th style={{ textAlign: "left", padding: "8px" }}>Partner Name</th>
                                     <th style={{ textAlign: "left", padding: "8px" }}>Phone</th>
                                     <th style={{ textAlign: "left", padding: "8px" }}>Actions</th>
                                 </tr>
@@ -123,7 +125,9 @@ const ManagementSections = ({
                                     <tr key={c._id} style={{ borderBottom: "1px solid #eee" }}>
                                         <td style={{ padding: "8px" }}>{c.customerId || 'N/A'}</td>
                                         <td style={{ padding: "8px" }}>{c.name}</td>
-                                        <td style={{ padding: "8px" }}>{c.email}</td>
+                                        <td style={{ padding: "8px" }}>{c.billingEmail}</td>
+                                        <td style={{ padding: "8px" }}>{c.country}</td>
+                                        <td style={{ padding: "8px" }}>{c.email || 'N/A'}</td>
                                         <td style={{ padding: "8px" }}>{c.address}</td>
                                         <td style={{ padding: "8px" }}>{c.channelPartnerName || 'N/A'}</td>
                                         <td style={{ padding: "8px" }}>{c.phone || 'N/A'}</td>

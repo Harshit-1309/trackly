@@ -13,6 +13,14 @@ const CustomerSchema = new mongoose.Schema({
     },
     email: {
         type: String,
+        required: false
+    },
+    billingEmail: {
+        type: String,
+        required: true
+    },
+    country: {
+        type: String,
         required: true
     },
     address: {

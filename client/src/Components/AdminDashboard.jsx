@@ -44,6 +44,8 @@ const AdminDashboard = ({ mobileOpen, handleDrawerToggle }) => {
     address: "",
     channelPartnerName: "",
     phone: "",
+    billingEmail: "",
+    country: "",
   });
   const [consultants, setConsultants] = useState([]);
   const [consultantForm, setConsultantForm] = useState({
@@ -179,6 +181,8 @@ const AdminDashboard = ({ mobileOpen, handleDrawerToggle }) => {
       address: "",
       channelPartnerName: "",
       phone: "",
+      billingEmail: "",
+      country: "",
     });
     setConsultantForm({ consultantId: "", name: "", email: "" });
     setUserForm({
@@ -224,6 +228,8 @@ const AdminDashboard = ({ mobileOpen, handleDrawerToggle }) => {
         address: item.address || "",
         channelPartnerName: item.channelPartnerName || "",
         phone: item.phone || "",
+        billingEmail: item.billingEmail || "",
+        country: item.country || "",
       });
     } else if (type === "consultant") {
       setConsultantForm({

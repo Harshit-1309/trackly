@@ -176,7 +176,9 @@ const FormDialogs = ({
                                     />
                                 )}
                                 <TextField fullWidth label="Name" name="name" value={customerForm.name} onChange={onCustomerChange} required variant="outlined" />
-                                <TextField fullWidth label="Email" name="email" type="email" value={customerForm.email} onChange={onCustomerChange} required variant="outlined" />
+                                <TextField fullWidth label="Billing Email" name="billingEmail" type="email" value={customerForm.billingEmail} onChange={onCustomerChange} required variant="outlined" />
+                                <TextField fullWidth label="Country" name="country" value={customerForm.country} onChange={onCustomerChange} required variant="outlined" />
+                                <TextField fullWidth label="Email" name="email" type="email" value={customerForm.email} onChange={onCustomerChange} variant="outlined" />
                                 <TextField fullWidth label="Address" name="address" value={customerForm.address} onChange={onCustomerChange} variant="outlined" />
                                 <TextField fullWidth label="Partner Name" name="channelPartnerName" value={customerForm.channelPartnerName} onChange={onCustomerChange} variant="outlined" />
                                 <TextField fullWidth label="Phone" name="phone" value={customerForm.phone} onChange={onCustomerChange} variant="outlined" />
