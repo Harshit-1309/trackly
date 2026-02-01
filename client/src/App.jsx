@@ -11,6 +11,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { API_BASE_URL } from "./api";
 
 axios.defaults.withCredentials = true;
 
@@ -31,7 +32,7 @@ function App() {
 
   useEffect(() => {
     axios
-      .get(`${import.meta.env.VITE_API_URL}/user`, { withCredentials: true })
+      .get(`${API_BASE_URL}/user`, { withCredentials: true })
       .then((response) => {
         if (response.data.user) {
           setIsLoggedIn(true);

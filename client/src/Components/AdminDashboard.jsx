@@ -12,6 +12,7 @@ import { toast } from "react-toastify";
 import { UserContext } from "../App";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import { API_BASE_URL } from "../api";
 
 // Sub-components
 import Sidebar from "./AdminDashboard/Sidebar";
@@ -99,7 +100,7 @@ const AdminDashboard = ({ mobileOpen, handleDrawerToggle }) => {
 
   const fetchCustomers = () => {
     axios
-      .get(`${import.meta.env.VITE_API_URL}/customers`, { withCredentials: true })
+      .get(`${API_BASE_URL}/customers`, { withCredentials: true })
       .then((res) => setCustomers(res.data))
       .catch((err) => {
         console.error("Fetch customers error:", err);
@@ -109,7 +110,7 @@ const AdminDashboard = ({ mobileOpen, handleDrawerToggle }) => {
 
   const fetchConsultants = () => {
     axios
-      .get(`${import.meta.env.VITE_API_URL}/consultants`)
+      .get(`${API_BASE_URL}/consultants`)
       .then((res) => setConsultants(res.data))
       .catch((err) => {
         console.error("Fetch consultants error:", err);
@@ -119,7 +120,7 @@ const AdminDashboard = ({ mobileOpen, handleDrawerToggle }) => {
 
   const fetchUsers = () => {
     axios
-      .get(`${import.meta.env.VITE_API_URL}/users`)
+      .get(`${API_BASE_URL}/users`)
       .then((res) => setUsers(res.data))
       .catch((err) => {
         console.error("Fetch users error:", err);
@@ -131,7 +132,7 @@ const AdminDashboard = ({ mobileOpen, handleDrawerToggle }) => {
 
   const fetchContracts = () => {
     axios
-      .get(`${import.meta.env.VITE_API_URL}/contracts`)
+      .get(`${API_BASE_URL}/contracts`)
       .then((res) => setContracts(res.data))
       .catch((err) => {
         console.error("Fetch contracts error:", err);
@@ -141,7 +142,7 @@ const AdminDashboard = ({ mobileOpen, handleDrawerToggle }) => {
 
   const fetchProducts = () => {
     axios
-      .get(`${import.meta.env.VITE_API_URL}/products`)
+      .get(`${API_BASE_URL}/products`)
       .then((res) => setProducts(res.data))
       .catch((err) => {
         console.error("Fetch products error:", err);
@@ -152,7 +153,7 @@ const AdminDashboard = ({ mobileOpen, handleDrawerToggle }) => {
   useEffect(() => {
     if (user && user.role === "admin") {
       const timer = setTimeout(() => {
-        axios.get(`${import.meta.env.VITE_API_URL}/check-session`)
+        axios.get(`${API_BASE_URL}/check-session`)
           .then(res => {
             if (res.data.authenticated && res.data.role === 'admin') {
               fetchCustomers();
@@ -163,7 +164,7 @@ const AdminDashboard = ({ mobileOpen, handleDrawerToggle }) => {
             }
           })
           .catch(err => {
-            console.error("!!! [V10] SERVER CHECK FAILED !!!", err);
+            // Session check failed, silently ignore
           });
       }, 1000);
       return () => clearTimeout(timer);
@@ -278,7 +279,7 @@ const AdminDashboard = ({ mobileOpen, handleDrawerToggle }) => {
   const confirmDelete = () => {
     const { id, type } = itemToDelete;
     axios
-      .delete(`${import.meta.env.VITE_API_URL}/${type}s/${id}`, { withCredentials: true })
+      .delete(`${API_BASE_URL}/${type}s/${id}`, { withCredentials: true })
       .then(() => {
         toast.success(`${type} deleted successfully`);
         if (type === "user") setUsers(users.filter((u) => u._id !== id));
@@ -298,23 +299,23 @@ const AdminDashboard = ({ mobileOpen, handleDrawerToggle }) => {
     let data = {};
 
     if (type === 'user') {
-      url = editingId ? `${import.meta.env.VITE_API_URL}/users/${editingId}` : `${import.meta.env.VITE_API_URL}/signup`;
+      url = editingId ? `${API_BASE_URL}/users/${editingId}` : `${API_BASE_URL}/signup`;
       method = editingId ? "put" : "post";
       data = userForm;
     } else if (type === 'customer') {
-      url = editingId ? `${import.meta.env.VITE_API_URL}/customers/${editingId}` : `${import.meta.env.VITE_API_URL}/customers`;
+      url = editingId ? `${API_BASE_URL}/customers/${editingId}` : `${API_BASE_URL}/customers`;
       method = editingId ? "put" : "post";
       data = customerForm;
     } else if (type === 'consultant') {
-      url = editingId ? `${import.meta.env.VITE_API_URL}/consultants/${editingId}` : `${import.meta.env.VITE_API_URL}/consultants`;
+      url = editingId ? `${API_BASE_URL}/consultants/${editingId}` : `${API_BASE_URL}/consultants`;
       method = editingId ? "put" : "post";
       data = consultantForm;
     } else if (type === 'product') {
-      url = editingId ? `${import.meta.env.VITE_API_URL}/products/${editingId}` : `${import.meta.env.VITE_API_URL}/products`;
+      url = editingId ? `${API_BASE_URL}/products/${editingId}` : `${API_BASE_URL}/products`;
       method = editingId ? "put" : "post";
       data = productForm;
     } else if (type === 'contract') {
-      url = editingId ? `${import.meta.env.VITE_API_URL}/contracts/${editingId}` : `${import.meta.env.VITE_API_URL}/contracts`;
+      url = editingId ? `${API_BASE_URL}/contracts/${editingId}` : `${API_BASE_URL}/contracts`;
       method = editingId ? "put" : "post";
       data = contractForm;
     }
@@ -354,7 +355,7 @@ const AdminDashboard = ({ mobileOpen, handleDrawerToggle }) => {
       return;
     }
     try {
-      await axios.patch(`${import.meta.env.VITE_API_URL}/users/${selectedItemInMenu._id}/password`, { password: newPassword }, { withCredentials: true });
+      await axios.patch(`${API_BASE_URL}/users/${selectedItemInMenu._id}/password`, { password: newPassword }, { withCredentials: true });
       toast.success("Password updated successfully");
       setIsPasswordDialogOpen(false);
       setNewPassword("");

@@ -1,4 +1,5 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../api";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
@@ -22,7 +23,6 @@ import {
   Avatar,
   Popover
 } from "@mui/material";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
@@ -100,7 +100,7 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn, user, handleDrawerToggle }) => {
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.put(`${import.meta.env.VITE_API_URL}/users/${user.id}`, {
+      const response = await axios.put(`${API_BASE_URL}/users/${user.id}`, {
         ...editForm,
         role: user.role,
         empId: user.empId
@@ -145,7 +145,7 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn, user, handleDrawerToggle }) => {
       return;
     }
     try {
-      await axios.patch(`${import.meta.env.VITE_API_URL}/users/${user.id}/password`, { password: newPass }, { withCredentials: true });
+      await axios.patch(`${API_BASE_URL}/users/${user.id}/password`, { password: newPass }, { withCredentials: true });
       toast.success("Password updated successfully");
       handlePassClose();
     } catch (error) {

@@ -33,23 +33,8 @@ app.use(morgan("combined")); // Standard production logging
 
 mongoose
     .connect(process.env.MONGO_URI)
-    .then(async () => {
+    .then(() => {
         console.log("Connected to MongoDB");
-        // One-time migration to rename Task ID prefix from GT to SR
-        try {
-            const TaskModel = require("./model/Task");
-            const tasksToUpdate = await TaskModel.find({ taskId: { $regex: /^GT/ } });
-            if (tasksToUpdate.length > 0) {
-                console.log(`Migrating ${tasksToUpdate.length} tasks from GT to SR prefix...`);
-                for (const task of tasksToUpdate) {
-                    const newTaskId = task.taskId.replace("GT", "SR");
-                    await TaskModel.findByIdAndUpdate(task._id, { taskId: newTaskId });
-                }
-                console.log("Migration completed successfully.");
-            }
-        } catch (err) {
-            console.error("Migration failed:", err);
-        }
     })
     .catch((err) => console.error("Failed to connect to MongoDB", err));
 
@@ -78,20 +63,12 @@ app.use(session({
     }
 }));
 
-// V11: Localhost Optimization Logging
-app.use((req, res, next) => {
-    if (req.url.startsWith('/')) {
-        console.log(`[V11: ${new Date().toLocaleTimeString()}] ${req.method} ${req.url} | SID: ${req.sessionID.substring(0,8)} | Auth: ${!!req.session.user}`);
-    }
-    next();
-});
 
 // Auth middleware
 const authenticate = (req, res, next) => {
     if (req.session && req.session.user && req.session.user.id) {
         next();
     } else {
-        console.log(`[V11 AUTH FAILED] ${req.method} ${req.url} | SID: ${req.sessionID.substring(0,8)}`);
         res.status(401).json({ error: "Unauthorized", sessionId: req.sessionID });
     }
 };
@@ -107,7 +84,7 @@ app.get("/check-session", (req, res) => {
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-    console.log(`[V11] Server is running on port ${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
 });
 
 app.post("/signup", async (req, res) => {

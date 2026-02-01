@@ -10,6 +10,7 @@ import {
   Fade
 } from "@mui/material";
 import { toast } from 'react-toastify';
+import { API_BASE_URL } from "../api";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
 
 const Signup = () => {
@@ -23,7 +24,7 @@ const Signup = () => {
   const handleSignup = (e) => {
     e.preventDefault();
     axios
-      .post(`${import.meta.env.VITE_API_URL}/signup`, { name, email, password, empId, contactNo })
+      .post(`${API_BASE_URL}/signup`, { name, email, password, empId, contactNo })
       .then((result) => {
         if (result.status === 201) {
           toast.success("User added successfully");
@@ -31,12 +32,9 @@ const Signup = () => {
         }
       })
       .catch((err) => {
-        if (err.response && err.response.status === 400) {
-          toast.error("Email already exists. Please use a different email.");
-          console.log("Email already exists!");
-        } else {
-          console.log(err);
-        }
+        console.error("Signup error:", err);
+        const errorMessage = err.response?.data?.error || "Signup failed. Please try again.";
+        toast.error(errorMessage);
       });
   };
 

@@ -1,5 +1,6 @@
 import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../api";
 import axios from "axios";
 import { Button } from "@mui/material";
 import { SetIsLoggedInContext, SetUserContext } from "../App";
@@ -11,7 +12,7 @@ function Logout() {
 
   const handleLogout = () => {
     axios
-      .post(`${import.meta.env.VITE_API_URL}/logout`, {}, { withCredentials: true })
+      .post(`${API_BASE_URL}/logout`, {}, { withCredentials: true })
       .then((response) => {
         if (response.status === 200) {
           setIsLoggedIn(false);

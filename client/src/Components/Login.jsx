@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
   Grid,
-  Link,
   Button,
   Paper,
   TextField,
@@ -12,6 +11,7 @@ import {
 } from "@mui/material";
 import { toast } from 'react-toastify';
 import { SetIsLoggedInContext, SetUserContext } from "../App";
+import { API_BASE_URL } from "../api";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -23,11 +23,9 @@ function Login() {
   const handleLogin = (e) => {
     e.preventDefault();
     axios
-      .post(`${import.meta.env.VITE_API_URL}/login`, { email, password }, { withCredentials: true })
+      .post(`${API_BASE_URL}/login`, { email, password }, { withCredentials: true })
       .then((result) => {
         if (result.data.status === "Success") {
-          console.log("Login Result:", result.data);
-          console.log("User Role:", result.data.role);
           setIsLoggedIn(true);
           setUser(result.data.user);
           const state = { user: result.data.user };
@@ -40,7 +38,11 @@ function Login() {
           toast.error("Login failed");
         }
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        console.error("Login error:", err);
+        const errorMessage = err.response?.data?.error || "Login failed. Please try again.";
+        toast.error(errorMessage);
+      });
   };
 
   const paperStyle = {

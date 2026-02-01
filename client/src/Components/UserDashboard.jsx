@@ -12,6 +12,7 @@ import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import dayjs from 'dayjs';
 import * as XLSX from 'xlsx';
+import { API_BASE_URL } from '../api';
 
 // Sub-components
 import Sidebar from './UserDashboard/Sidebar';
@@ -76,10 +77,10 @@ const UserDashboard = () => {
             if (!user) return;
             try {
                 const [cu, co, cn, ta] = await Promise.all([
-                    axios.get(`${import.meta.env.VITE_API_URL}/customers`),
-                    axios.get(`${import.meta.env.VITE_API_URL}/consultants`),
-                    axios.get(`${import.meta.env.VITE_API_URL}/contracts`),
-                    axios.get(`${import.meta.env.VITE_API_URL}/tasks`)
+                    axios.get(`${API_BASE_URL}/customers`),
+                    axios.get(`${API_BASE_URL}/consultants`),
+                    axios.get(`${API_BASE_URL}/contracts`),
+                    axios.get(`${API_BASE_URL}/tasks`)
                 ]);
                 setCustomers(cu.data); setConsultants(co.data); setContracts(cn.data); setTasks(ta.data);
                 setTaskForm(prev => ({ ...prev, createdBy: user?.id || '' }));
@@ -105,12 +106,12 @@ const UserDashboard = () => {
         e.preventDefault();
         try {
             if (editingTaskId) {
-                await axios.put(`${import.meta.env.VITE_API_URL}/tasks/${editingTaskId}`, taskForm, { withCredentials: true });
+                await axios.put(`${API_BASE_URL}/tasks/${editingTaskId}`, taskForm, { withCredentials: true });
             } else {
-                await axios.post(`${import.meta.env.VITE_API_URL}/tasks`, taskForm, { withCredentials: true });
+                await axios.post(`${API_BASE_URL}/tasks`, taskForm, { withCredentials: true });
             }
             toast.success("Task saved successfully");
-            const res = await axios.get(`${import.meta.env.VITE_API_URL}/tasks`, { withCredentials: true });
+            const res = await axios.get(`${API_BASE_URL}/tasks`, { withCredentials: true });
             setTasks(res.data);
             setActiveSection('manage tasks');
             setEditingTaskId(null);
@@ -139,7 +140,7 @@ const UserDashboard = () => {
 
     const handleDelete = async () => {
         try {
-            await axios.delete(`${import.meta.env.VITE_API_URL}/tasks/${taskToDelete}`);
+            await axios.delete(`${API_BASE_URL}/tasks/${taskToDelete}`);
             setTasks(tasks.filter(t => t._id !== taskToDelete));
             setDeleteDialogOpen(false);
             toast.success("Task deleted");
