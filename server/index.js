@@ -13,7 +13,11 @@ const compression = require("compression");
 const morgan = require("morgan");
 const UserModel = require("./model/User");
 
-dotenv.config({ path: path.join(__dirname, ".env") });
+dotenv.config(); // Loads from process.env first, then falls back to .env in cwd
+// Fallback for specific path if needed
+if (!process.env.MONGO_URI) {
+    dotenv.config({ path: path.join(__dirname, ".env") });
+}
 
 const app = express();
 app.use(express.json({ limit: '50mb' }));
@@ -98,8 +102,9 @@ app.get("/check-session", (req, res) => {
     });
 });
 
-app.listen(process.env.PORT, () => {
-    console.log(`[V11] Server is running on port ${process.env.PORT} (Localhost Only)`);
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+    console.log(`[V11] Server is running on port ${PORT}`);
 });
 
 app.post("/signup", async (req, res) => {
