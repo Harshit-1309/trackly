@@ -776,7 +776,7 @@ app.delete("/tasks/:id", authenticate, async (req, res) => {
 if (process.env.NODE_ENV === "production" || process.env.SERVE_STATIC === "true") {
     const buildPath = path.join(__dirname, "../client/dist");
     app.use(express.static(buildPath));
-    app.get("*", (req, res) => {
+    app.get("(.*)", (req, res) => {
         if (!req.url.startsWith("/api")) { // Basic check to not consume API calls
             res.sendFile(path.join(buildPath, "index.html"));
         } else {
