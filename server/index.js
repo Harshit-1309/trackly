@@ -20,6 +20,9 @@ if (!process.env.MONGO_URI) {
 }
 
 const app = express();
+if (process.env.NODE_ENV === "production") {
+    app.set('trust proxy', 1); // Required for secure cookies behind proxies like Render
+}
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(helmet({
@@ -776,8 +779,8 @@ app.delete("/tasks/:id", authenticate, async (req, res) => {
 if (process.env.NODE_ENV === "production" || process.env.SERVE_STATIC === "true") {
     const buildPath = path.join(__dirname, "../client/dist");
     app.use(express.static(buildPath));
-    app.get("(.*)", (req, res) => {
-        if (!req.url.startsWith("/api")) { // Basic check to not consume API calls
+    app.get(/.*/, (req, res) => {
+        if (!req.path.startsWith("/api")) { // Use req.path instead of req.url for cleaner matching
             res.sendFile(path.join(buildPath, "index.html"));
         } else {
             res.status(404).json({ error: "API route not found" });
