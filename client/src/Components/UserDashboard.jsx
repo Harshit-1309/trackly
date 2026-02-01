@@ -22,13 +22,12 @@ import ContractSection from './UserDashboard/ContractSection';
 import TaskFormSection from './UserDashboard/TaskFormSection';
 import TaskDialogs from './UserDashboard/TaskDialogs';
 
-const UserDashboard = () => {
+const UserDashboard = ({ mobileOpen, handleDrawerToggle }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const user = useContext(UserContext);
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-    const [mobileOpen, setMobileOpen] = useState(false);
     const [activeSection, setActiveSection] = useState('overview');
 
     const [customers, setCustomers] = useState([]);
@@ -337,23 +336,16 @@ const UserDashboard = () => {
     return (
         <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#f5f7f9' }}>
             <Box component="nav" sx={{ width: { sm: 240 }, flexShrink: { sm: 0 } }}>
-                <Drawer variant="temporary" open={mobileOpen} onClose={() => setMobileOpen(false)} ModalProps={{ keepMounted: true }}
+                <Drawer variant="temporary" open={mobileOpen} onClose={handleDrawerToggle} ModalProps={{ keepMounted: true }}
                     sx={{ display: { xs: 'block', sm: 'none' }, '& .MuiDrawer-paper': { boxSizing: 'border-box', width: 240 } }}>
-                    <Sidebar activeSection={activeSection} setActiveSection={setActiveSection} isMobile={isMobile} setMobileOpen={setMobileOpen} />
+                    <Sidebar activeSection={activeSection} setActiveSection={setActiveSection} isMobile={isMobile} handleDrawerToggle={handleDrawerToggle} />
                 </Drawer>
                 <Drawer variant="permanent" open
                     sx={{ display: { xs: 'none', sm: 'block' }, '& .MuiDrawer-paper': { boxSizing: 'border-box', width: 240, mt: '64px', border: 'none', height: 'calc(100% - 64px)' } }}>
-                    <Sidebar activeSection={activeSection} setActiveSection={setActiveSection} isMobile={isMobile} setMobileOpen={setMobileOpen} />
+                    <Sidebar activeSection={activeSection} setActiveSection={setActiveSection} isMobile={isMobile} handleDrawerToggle={handleDrawerToggle} />
                 </Drawer>
             </Box>
             <Box component="main" sx={{ flexGrow: 1, p: { xs: 2, sm: 4 }, width: { sm: `calc(100% - 240px)` } }}>
-                <AppBar position="fixed" sx={{ width: { sm: `calc(100% - 240px)` }, ml: { sm: `240px` }, bgcolor: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)', color: 'text.primary', boxShadow: 'none', borderBottom: '1px solid rgba(0,0,0,0.05)', display: { sm: 'none' } }}>
-                    <Toolbar>
-                        <IconButton color="inherit" edge="start" onClick={() => setMobileOpen(!mobileOpen)} sx={{ mr: 2, display: { sm: 'none' } }}><MenuIcon /></IconButton>
-                        <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 800 }}>Dashboard</Typography>
-                    </Toolbar>
-                </AppBar>
-                <Toolbar sx={{ display: { xs: 'block', sm: 'none' } }} />
                 <Toolbar />
                 <Container maxWidth="xl" sx={{ p: 0 }}>
                     {user?.role === 'admin' && (

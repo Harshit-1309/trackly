@@ -13,7 +13,7 @@ import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 
-const Sidebar = ({ activeSection, setActiveSection, isMobile, setMobileOpen }) => {
+const Sidebar = ({ activeSection, setActiveSection, isMobile, handleDrawerToggle }) => {
     const menuItems = [
         { text: 'Overview', icon: <DashboardIcon /> },
         { text: 'Contracts', icon: <ReceiptLongIcon /> },
@@ -30,7 +30,7 @@ const Sidebar = ({ activeSection, setActiveSection, isMobile, setMobileOpen }) =
                         <ListItemButton
                             onClick={() => {
                                 setActiveSection(item.text.toLowerCase());
-                                if (isMobile) setMobileOpen(false);
+                                if (isMobile) handleDrawerToggle();
                             }}
                             selected={activeSection === item.text.toLowerCase()}
                             sx={{
