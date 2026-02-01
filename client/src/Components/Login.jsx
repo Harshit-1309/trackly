@@ -12,6 +12,7 @@ import {
 import { toast } from 'react-toastify';
 import { SetIsLoggedInContext, SetUserContext } from "../App";
 import { API_BASE_URL } from "../api";
+import Footer from "./Footer";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -64,8 +65,8 @@ function Login() {
 
   return (
     <Fade in={true} timeout={800}>
-      <div>
-        <Grid align="center" className="wrapper">
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+        <Grid align="center" className="wrapper" sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Paper
             style={paperStyle}
             sx={{
@@ -77,7 +78,7 @@ function Login() {
                 xl: "20vw",
               },
               height: "auto",
-              margin: { xs: "80px auto", sm: "100px auto" },
+              margin: "2rem auto", // Changed from fixed margin to allow centering
               padding: { xs: "1.5rem", sm: "2rem" },
               backgroundColor: "#f5f5dc", // Beige
               transition: "transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out",
@@ -138,6 +139,7 @@ function Login() {
             </form>
           </Paper>
         </Grid>
+        <Footer />
       </div>
     </Fade>
   );

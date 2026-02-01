@@ -48,7 +48,7 @@ app.use(
 app.use(session({
     name: 'timetracker.sid',
     secret: process.env.SESSION_SECRET || '12345',
-    resave: true, 
+    resave: false, 
     saveUninitialized: false, 
     store: MongoStore.create({
         mongoUrl: process.env.MONGO_URI,

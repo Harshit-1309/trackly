@@ -31,6 +31,16 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import BadgeIcon from '@mui/icons-material/Badge';
 import PeopleIcon from '@mui/icons-material/People';
 
+const DetailItem = ({ icon, label, value }) => (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        {icon}
+        <Box>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.5 }}>{label}</Typography>
+            <Typography variant="body1" sx={{ fontWeight: 600 }}>{value || 'N/A'}</Typography>
+        </Box>
+    </Box>
+);
+
 const FormDialogs = ({
     // State
     dialogs,
@@ -388,7 +398,7 @@ const FormDialogs = ({
                 </MenuItem>
                 <MenuItem onClick={handleInfoOpen}>
                     <ListItemIcon><InfoIcon fontSize="small" color="info" /></ListItemIcon>
-                    <ListItemText>Info</ListItemText>
+                    <ListItemText>View Details</ListItemText>
                 </MenuItem>
                 {selectedItem?.type === 'user' && (
                     <MenuItem onClick={() => { handlers.openPasswordDialog(); }}>
@@ -418,73 +428,101 @@ const FormDialogs = ({
                 </form>
             </Dialog>
 
-            {/* User Info Dialog */}
+            {/* Item Info Dialog */}
             <Dialog open={isInfoOpen} onClose={onCloseAll} maxWidth="sm" fullWidth>
                 <DialogTitle sx={{ fontWeight: 'bold', bgcolor: 'info.main', color: 'white', display: 'flex', alignItems: 'center', gap: 1.5, py: 2 }}>
-                    <InfoIcon /> User Information
+                    <InfoIcon /> {selectedItem?.type?.toUpperCase()} Details
                 </DialogTitle>
                 <DialogContent dividers sx={{ pt: 3 }}>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                            <Avatar src={selectedUserInfo?.profileImage} sx={{ width: 80, height: 80, bgcolor: 'primary.main', fontSize: '2rem', fontWeight: 'bold' }}>
-                                {selectedUserInfo?.name?.charAt(0).toUpperCase()}
-                            </Avatar>
+                    {selectedItem?.type === 'user' && (
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                                <Avatar src={selectedItem?.profileImage} sx={{ width: 80, height: 80, bgcolor: 'primary.main', fontSize: '2rem', fontWeight: 'bold' }}>
+                                    {selectedItem?.name?.charAt(0).toUpperCase()}
+                                </Avatar>
+                                <Box>
+                                    <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'text.primary' }}>{selectedItem?.name}</Typography>
+                                    <Chip label={selectedItem?.role?.toUpperCase()} color={selectedItem?.role === 'admin' ? 'error' : 'primary'} size="small" sx={{ mt: 0.5, fontWeight: 'bold' }} />
+                                </Box>
+                            </Box>
+                            <Divider />
+                            <Grid container spacing={2.5}>
+                                <Grid item xs={12} sm={6}><DetailItem icon={<EmailIcon color="action" />} label="Email Address" value={selectedItem?.email} /></Grid>
+                                <Grid item xs={12} sm={6}><DetailItem icon={<BadgeIcon color="action" />} label="Employee ID" value={selectedItem?.empId || 'N/A'} /></Grid>
+                                <Grid item xs={12} sm={6}><DetailItem icon={<PhoneIcon color="action" />} label="Contact Number" value={selectedItem?.contactNo || 'N/A'} /></Grid>
+                                <Grid item xs={12} sm={6}><DetailItem icon={<PeopleIcon color="action" />} label="Account Role" value={selectedItem?.role} /></Grid>
+                            </Grid>
+                        </Box>
+                    )}
+
+                    {selectedItem?.type === 'customer' && (
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            <Typography variant="h6" sx={{ fontWeight: 800 }}>{selectedItem?.name}</Typography>
+                            <Divider />
+                            <Grid container spacing={2}>
+                                <Grid item xs={12} sm={6}><DetailItem label="Customer ID" value={selectedItem?.customerId} /></Grid>
+                                <Grid item xs={12} sm={6}><DetailItem label="Billing Email" value={selectedItem?.billingEmail} /></Grid>
+                                <Grid item xs={12} sm={6}><DetailItem label="Country" value={selectedItem?.country} /></Grid>
+                                <Grid item xs={12} sm={6}><DetailItem label="Partner" value={selectedItem?.channelPartnerName || 'Direct'} /></Grid>
+                                <Grid item xs={12}><DetailItem label="Address" value={selectedItem?.address || 'N/A'} /></Grid>
+                            </Grid>
+                        </Box>
+                    )}
+
+                    {selectedItem?.type === 'product' && (
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            <Typography variant="h6" sx={{ fontWeight: 800 }}>{selectedItem?.name}</Typography>
+                            <Divider />
                             <Box>
-                                <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'text.primary' }}>{selectedUserInfo?.name}</Typography>
-                                <Chip label={selectedUserInfo?.role?.toUpperCase()} color={selectedUserInfo?.role === 'admin' ? 'error' : 'primary'} size="small" sx={{ mt: 0.5, fontWeight: 'bold' }} />
+                                <Typography variant="caption" color="textSecondary" sx={{ fontWeight: 800 }}>PRODUCT ID</Typography>
+                                <Typography variant="body1" sx={{ fontWeight: 700 }}>{selectedItem?.productId}</Typography>
+                            </Box>
+                            <Box>
+                                <Typography variant="caption" color="textSecondary" sx={{ fontWeight: 800 }}>DESCRIPTION</Typography>
+                                <Typography variant="body2" sx={{ color: 'text.secondary', whiteSpace: 'pre-wrap' }}>{selectedItem?.description || 'No description available.'}</Typography>
                             </Box>
                         </Box>
-                        <Divider />
-                        <Grid container spacing={2.5}>
-                            <Grid item xs={12} sm={6}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                    <EmailIcon color="action" />
-                                    <Box>
-                                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Email Address</Typography>
-                                        <Typography variant="body1" sx={{ fontWeight: 500 }}>{selectedUserInfo?.email}</Typography>
-                                    </Box>
-                                </Box>
+                    )}
+
+                    {selectedItem?.type === 'consultant' && (
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            <Typography variant="h6" sx={{ fontWeight: 800 }}>{selectedItem?.name}</Typography>
+                            <Divider />
+                            <Grid container spacing={2}>
+                                <Grid item xs={12} sm={6}><DetailItem label="Consultant ID" value={selectedItem?.consultantId} /></Grid>
+                                <Grid item xs={12} sm={6}><DetailItem label="Email" value={selectedItem?.email} /></Grid>
                             </Grid>
-                            <Grid item xs={12} sm={6}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                    <BadgeIcon color="action" />
-                                    <Box>
-                                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Employee ID</Typography>
-                                        <Typography variant="body1" sx={{ fontWeight: 500 }}>{selectedUserInfo?.empId || 'N/A'}</Typography>
-                                    </Box>
-                                </Box>
+                        </Box>
+                    )}
+
+                    {selectedItem?.type === 'contract' && (
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            <Typography variant="h6" sx={{ fontWeight: 800 }}>{selectedItem?.contractName}</Typography>
+                            <Divider />
+                            <Grid container spacing={2}>
+                                <Grid item xs={12} sm={6}><DetailItem label="Contract ID" value={selectedItem?.contractId} /></Grid>
+                                <Grid item xs={12} sm={6}><DetailItem label="Status" value={selectedItem?.contractStatus} /></Grid>
+                                <Grid item xs={12} sm={6}><DetailItem label="Type" value={selectedItem?.contractType} /></Grid>
+                                <Grid item xs={12} sm={6}><DetailItem label="Validity" value={`${selectedItem?.startDate?.split('T')[0]} to ${selectedItem?.endDate?.split('T')[0]}`} /></Grid>
+                                <Grid item xs={12} sm={6}><DetailItem label="Product" value={selectedItem?.product?.name || 'All'} /></Grid>
+                                <Grid item xs={12} sm={6}><DetailItem label="Customer" value={selectedItem?.customer?.name || 'N/A'} /></Grid>
+                                <Grid item xs={12} sm={4}><DetailItem label="Hours" value={selectedItem?.supportHours} /></Grid>
+                                <Grid item xs={12} sm={4}><DetailItem label="Level" value={selectedItem?.supportLevel} /></Grid>
+                                <Grid item xs={12} sm={4}><DetailItem label="Tickets" value={selectedItem?.includedTickets} /></Grid>
                             </Grid>
-                            <Grid item xs={12} sm={6}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                    <PhoneIcon color="action" />
-                                    <Box>
-                                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Contact Number</Typography>
-                                        <Typography variant="body1" sx={{ fontWeight: 500 }}>{selectedUserInfo?.contactNo || 'N/A'}</Typography>
-                                    </Box>
-                                </Box>
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                    <PeopleIcon color="action" />
-                                    <Box>
-                                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Account Role</Typography>
-                                        <Typography variant="body1" sx={{ fontWeight: 500, textTransform: 'capitalize' }}>{selectedUserInfo?.role}</Typography>
-                                    </Box>
-                                </Box>
-                            </Grid>
-                        </Grid>
-                    </Box>
+                        </Box>
+                    )}
                 </DialogContent>
                 <DialogActions sx={{ p: 2 }}>
                     <Button onClick={onCloseAll} variant="outlined" sx={{ fontWeight: 'bold' }}>Close</Button>
                     <Button
                         variant="contained"
                         color="primary"
-                        onClick={() => { onCloseAll(); handleEditClick(selectedUserInfo, "user"); }}
+                        onClick={() => { handleEditClick(selectedItem, selectedItem?.type); handleActionMenuClose(); }}
                         startIcon={<EditIcon />}
                         sx={{ fontWeight: 'bold' }}
                     >
-                        Edit This User
+                        Edit This {selectedItem?.type}
                     </Button>
                 </DialogActions>
             </Dialog>

@@ -6,6 +6,9 @@ import Signup from "./Components/Signup";
 import Navbar from "./Components/Navbar";
 import AdminDashboard from "./Components/AdminDashboard";
 import UserDashboard from "./Components/UserDashboard";
+import PrivacyPolicy from "./Components/PrivacyPolicy";
+import TermsOfService from "./Components/TermsOfService";
+import ContactSupport from "./Components/ContactSupport";
 import axios from "axios";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -32,9 +35,9 @@ function App() {
 
   useEffect(() => {
     axios
-      .get(`${API_BASE_URL}/user`, { withCredentials: true })
+      .get(`${API_BASE_URL}/check-session`, { withCredentials: true })
       .then((response) => {
-        if (response.data.user) {
+        if (response.data.authenticated && response.data.user) {
           setIsLoggedIn(true);
           setUser(response.data.user);
         } else {
@@ -121,6 +124,9 @@ function App() {
                       )
                     }
                   />
+                  <Route path="/privacy" element={<PrivacyPolicy />} />
+                  <Route path="/terms" element={<TermsOfService />} />
+                  <Route path="/contact" element={<ContactSupport />} />
                 </Routes>
               </BrowserRouter>
             </LocalizationProvider>
