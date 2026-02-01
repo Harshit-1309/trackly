@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Dialog,
     DialogTitle,
@@ -16,8 +16,10 @@ import {
     Menu,
     MenuItem,
     ListItemIcon,
-    Tooltip
+    Tooltip,
+    useMediaQuery
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import CloseIcon from '@mui/icons-material/Close';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import PersonIcon from '@mui/icons-material/Person';
@@ -51,6 +53,9 @@ const TaskDialogs = ({
         onDeleteClick,
         onInfoOpen
     } = handlers;
+    const [contractInfoOpen, setContractInfoOpen] = useState(false);
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     const canModify = user?.role === 'admin' || (selectedTask && (selectedTask.createdBy?._id === user?.id || selectedTask.createdBy === user?.id));
 
@@ -156,30 +161,42 @@ const TaskDialogs = ({
                                                     {selectedTask.contract && (
                                                         <Tooltip
                                                             title={
-                                                                <Box sx={{ p: 1 }}>
-                                                                    <Typography variant="subtitle2" sx={{ fontWeight: 800, borderBottom: '1px solid rgba(255,255,255,0.2)', mb: 1, pb: 0.5 }}>
-                                                                        {selectedTask.contract.contractName}
-                                                                    </Typography>
-                                                                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                                                                        <Typography variant="caption" sx={{ display: 'block', opacity: 0.9 }}>
-                                                                            <strong>ID:</strong> {selectedTask.contract.contractId}
+                                                                !isMobile && (
+                                                                    <Box sx={{ p: 1 }}>
+                                                                        <Typography variant="subtitle2" sx={{ fontWeight: 800, borderBottom: '1px solid rgba(255,255,255,0.2)', mb: 1, pb: 0.5 }}>
+                                                                            {selectedTask.contract.contractName}
                                                                         </Typography>
-                                                                        <Typography variant="caption" sx={{ display: 'block', opacity: 0.9 }}>
-                                                                            <strong>Type:</strong> {selectedTask.contract.contractType}
-                                                                        </Typography>
-                                                                        <Typography variant="caption" sx={{ display: 'block', opacity: 0.9 }}>
-                                                                            <strong>Period:</strong> {dayjs(selectedTask.contract.startDate).format('DD MMM YYYY')} - {dayjs(selectedTask.contract.endDate).format('DD MMM YYYY')}
-                                                                        </Typography>
-                                                                        <Typography variant="caption" sx={{ display: 'block', opacity: 0.9 }}>
-                                                                            <strong>Status:</strong> {selectedTask.contract.contractStatus || 'N/A'}
-                                                                        </Typography>
+                                                                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                                                                            <Typography variant="caption" sx={{ display: 'block', opacity: 0.9 }}>
+                                                                                <strong>ID:</strong> {selectedTask.contract.contractId}
+                                                                            </Typography>
+                                                                            <Typography variant="caption" sx={{ display: 'block', opacity: 0.9 }}>
+                                                                                <strong>Type:</strong> {selectedTask.contract.contractType}
+                                                                            </Typography>
+                                                                            <Typography variant="caption" sx={{ display: 'block', opacity: 0.9 }}>
+                                                                                <strong>Period:</strong> {dayjs(selectedTask.contract.startDate).format('DD MMM YYYY')} - {dayjs(selectedTask.contract.endDate).format('DD MMM YYYY')}
+                                                                            </Typography>
+                                                                            <Typography variant="caption" sx={{ display: 'block', opacity: 0.9 }}>
+                                                                                <strong>Status:</strong> {selectedTask.contract.contractStatus || 'N/A'}
+                                                                            </Typography>
+                                                                        </Box>
                                                                     </Box>
-                                                                </Box>
+                                                                )
                                                             }
                                                             arrow
                                                             placement="top"
+                                                            disableHoverListener={isMobile}
                                                         >
-                                                            <InfoOutlinedIcon sx={{ fontSize: 16, color: 'text.secondary', cursor: 'pointer' }} />
+                                                            <IconButton
+                                                                size="small"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    if (isMobile) setContractInfoOpen(true);
+                                                                }}
+                                                                sx={{ p: 0.5, ml: 0.5 }}
+                                                            >
+                                                                <InfoOutlinedIcon sx={{ fontSize: 18, color: 'primary.main' }} />
+                                                            </IconButton>
                                                         </Tooltip>
                                                     )}
                                                 </Box>
@@ -263,6 +280,47 @@ const TaskDialogs = ({
                     >
                         Close
                     </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Contract Details Dialog for Mobile */}
+            <Dialog
+                open={contractInfoOpen}
+                onClose={() => setContractInfoOpen(false)}
+                PaperProps={{ sx: { borderRadius: 4, p: 1, maxWidth: '90vw' } }}
+            >
+                <DialogTitle sx={{ fontWeight: 900, pb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <ReceiptLongIcon color="primary" /> {selectedTask?.contract?.contractName}
+                </DialogTitle>
+                <DialogContent>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mt: 1 }}>
+                        <Box>
+                            <Typography variant="caption" color="textSecondary" sx={{ fontWeight: 800, display: 'block' }}>CONTRACT ID</Typography>
+                            <Typography variant="body1" sx={{ fontWeight: 700 }}>{selectedTask?.contract?.contractId}</Typography>
+                        </Box>
+                        <Box>
+                            <Typography variant="caption" color="textSecondary" sx={{ fontWeight: 800, display: 'block' }}>CONTRACT TYPE</Typography>
+                            <Typography variant="body1" sx={{ fontWeight: 700 }}>{selectedTask?.contract?.contractType}</Typography>
+                        </Box>
+                        <Box>
+                            <Typography variant="caption" color="textSecondary" sx={{ fontWeight: 800, display: 'block' }}>VALIDITY PERIOD</Typography>
+                            <Typography variant="body1" sx={{ fontWeight: 700 }}>
+                                {dayjs(selectedTask?.contract?.startDate).format('DD MMM YYYY')} - {dayjs(selectedTask?.contract?.endDate).format('DD MMM YYYY')}
+                            </Typography>
+                        </Box>
+                        <Box>
+                            <Typography variant="caption" color="textSecondary" sx={{ fontWeight: 800, display: 'block' }}>CURRENT STATUS</Typography>
+                            <Chip
+                                label={selectedTask?.contract?.contractStatus || 'Active'}
+                                size="small"
+                                color="success"
+                                sx={{ fontWeight: 800, mt: 0.5 }}
+                            />
+                        </Box>
+                    </Box>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setContractInfoOpen(false)} sx={{ fontWeight: 800 }}>Close</Button>
                 </DialogActions>
             </Dialog>
 
