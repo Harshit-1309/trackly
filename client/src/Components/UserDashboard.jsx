@@ -45,7 +45,7 @@ const UserDashboard = ({ mobileOpen, handleDrawerToggle }) => {
     const [infoOpen, setInfoOpen] = useState(false);
 
     // Filters and Sorting
-    const [sortBy, setSortBy] = useState('none');
+    const [sortBy, setSortBy] = useState('time');
     const [searchTerm, setSearchTerm] = useState('');
     const [contractSearch, setContractSearch] = useState('');
 
@@ -184,7 +184,12 @@ const UserDashboard = ({ mobileOpen, handleDrawerToggle }) => {
             groups[k].tasks.push(t);
             groups[k].total += Number(t.timeTaken) || 0;
         });
-        return Object.values(groups).sort((a, b) => a.title.localeCompare(b.title));
+        return Object.values(groups).sort((a, b) => {
+            if (sortBy === 'time') {
+                return dayjs(b.title, 'DD MMM YYYY').diff(dayjs(a.title, 'DD MMM YYYY'));
+            }
+            return a.title.localeCompare(b.title);
+        });
     };
 
     const getFilteredContracts = () => {

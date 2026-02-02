@@ -12,14 +12,20 @@ import {
     Accordion,
     AccordionSummary,
     AccordionDetails,
-    Divider
+    Divider,
+    Fab,
+    Zoom,
+    useScrollTrigger
 } from '@mui/material';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import AddIcon from '@mui/icons-material/Add';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import dayjs from 'dayjs';
 
 const HighlightText = ({ text = '', highlight = '' }) => {
@@ -83,6 +89,77 @@ const TimesheetSection = ({
         exportAnchorEl,
         filterAnchorEl
     } = anchors;
+
+    const [page, setPage] = React.useState(1);
+    const ITEMS_PER_PAGE = 50;
+
+    React.useEffect(() => {
+        setPage(1);
+    }, [tasks.length, searchTerm, sortBy, filters]);
+
+    const sortedTasks = React.useMemo(() => {
+        if (sortBy === 'none') return tasks;
+
+        return [...tasks].sort((a, b) => {
+            let keyA = '', keyB = '';
+            if (sortBy === 'customer') { keyA = a.customer?.name || ''; keyB = b.customer?.name || ''; }
+            else if (sortBy === 'consultant') { keyA = a.consultant?.name || ''; keyB = b.consultant?.name || ''; }
+            else if (sortBy === 'contract') { keyA = a.contract?.contractName || ''; keyB = b.contract?.contractName || ''; }
+            else if (sortBy === 'time') {
+                return dayjs(b.startTime).diff(dayjs(a.startTime));
+            }
+
+            if (keyA !== keyB) return keyA.localeCompare(keyB);
+            // Secondary sort by startTime DESC
+            return dayjs(b.startTime).diff(dayjs(a.startTime));
+        });
+    }, [tasks, sortBy]);
+
+    const paginatedTasks = React.useMemo(() => {
+        const start = (page - 1) * ITEMS_PER_PAGE;
+        return sortedTasks.slice(start, start + ITEMS_PER_PAGE);
+    }, [sortedTasks, page]);
+
+    const paginatedGroups = React.useMemo(() => {
+        if (sortBy === 'none') return [];
+        const groups = [];
+        let currentGroup = null;
+
+        paginatedTasks.forEach(t => {
+            let k = 'Other';
+            if (sortBy === 'customer') k = t.customer?.name || 'Unknown';
+            else if (sortBy === 'consultant') k = t.consultant?.name || 'Unknown';
+            else if (sortBy === 'contract') k = t.contract?.contractName || 'General';
+            else if (sortBy === 'time') k = dayjs(t.startTime).format('DD MMM YYYY');
+
+            if (!currentGroup || currentGroup.title !== k) {
+                const fullGroup = groupedTasks.find(g => g.title === k);
+                currentGroup = {
+                    title: k,
+                    tasks: [],
+                    total: fullGroup ? fullGroup.total : 0,
+                    count: fullGroup ? fullGroup.tasks.length : 0
+                };
+                groups.push(currentGroup);
+            }
+            currentGroup.tasks.push(t);
+        });
+        return groups;
+    }, [paginatedTasks, sortBy, groupedTasks]);
+
+    const totalPages = Math.ceil(tasks.length / ITEMS_PER_PAGE);
+
+    const handleNextPage = () => { setPage(p => Math.min(p + 1, totalPages)); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+    const handlePrevPage = () => { setPage(p => Math.max(p - 1, 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+
+    const showScrollTop = useScrollTrigger({
+        disableHysteresis: true,
+        threshold: 300,
+    });
+
+    const handleScrollTop = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     return (
         <Box>
@@ -300,7 +377,7 @@ const TimesheetSection = ({
                             </tr>
                         </thead>
                         <tbody>
-                            {tasks.map(t => (
+                            {paginatedTasks.length > 0 && paginatedTasks.map(t => (
                                 <tr key={t._id} style={{ borderBottom: '1px solid #f5f5f5' }}>
                                     <td style={{ padding: '12px' }}>
                                         <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'primary.main' }}>{t.displayId}</Typography>
@@ -339,7 +416,7 @@ const TimesheetSection = ({
                     </table>
                 </Box>
             ) : (
-                groupedTasks.map(g => (
+                paginatedGroups.length > 0 && paginatedGroups.map(g => (
                     <Accordion key={g.title} defaultExpanded sx={{
                         mb: 3,
                         borderRadius: '20px !important',
@@ -359,7 +436,10 @@ const TimesheetSection = ({
                         >
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                 <Typography variant="subtitle1" sx={{ fontWeight: 900, color: 'text.primary' }}>{g.title}</Typography>
-                                <Chip label={`${g.tasks.length} entries`} size="small" sx={{ height: 20, fontSize: '0.65rem', fontWeight: 800, bgcolor: 'primary.main', color: 'white' }} />
+                                <Chip label={`${g.count} entries`} size="small" sx={{ height: 20, fontSize: '0.65rem', fontWeight: 800, bgcolor: 'primary.main', color: 'white' }} />
+                                {g.tasks.length < g.count && (
+                                    <Chip label="cont." size="small" variant="outlined" sx={{ height: 20, fontSize: '0.65rem', fontWeight: 800, color: 'primary.main' }} />
+                                )}
                             </Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                 <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Total:</Typography>
@@ -398,6 +478,68 @@ const TimesheetSection = ({
                     </Accordion>
                 ))
             )}
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+                <Box sx={{
+                    mt: 4,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 2,
+                    pb: 2
+                }}>
+                    <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={handlePrevPage}
+                        disabled={page === 1}
+                        startIcon={<ChevronLeftIcon />}
+                        sx={{ borderRadius: 2, fontWeight: 700 }}
+                    >
+                        Previous
+                    </Button>
+
+                    <Typography variant="body2" sx={{ fontWeight: 800, color: 'text.secondary' }}>
+                        Page <Typography component="span" variant="body2" sx={{ color: 'primary.main', fontWeight: 900 }}>{page}</Typography> of {totalPages}
+                    </Typography>
+
+                    <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={handleNextPage}
+                        disabled={page === totalPages}
+                        endIcon={<ChevronRightIcon />}
+                        sx={{ borderRadius: 2, fontWeight: 700 }}
+                    >
+                        Next
+                    </Button>
+                </Box>
+            )}
+
+            {tasks.length === 0 && (
+                <Box sx={{ py: 10, textAlign: 'center' }}>
+                    <Typography variant="h6" color="text.secondary">No tasks found matching your criteria</Typography>
+                </Box>
+            )}
+
+            <Zoom in={showScrollTop}>
+                <Fab
+                    color="primary"
+                    size="small"
+                    onClick={handleScrollTop}
+                    sx={{
+                        position: 'fixed',
+                        bottom: 32,
+                        right: 32,
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                        '&:hover': { transform: 'scale(1.1)' },
+                        transition: 'all 0.3s ease'
+                    }}
+                >
+                    <KeyboardArrowUpIcon />
+                </Fab>
+            </Zoom>
         </Box>
     );
 };
