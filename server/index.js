@@ -13,6 +13,15 @@ const compression = require("compression");
 const morgan = require("morgan");
 const UserModel = require("./model/User");
 
+const CustomerModel = require("./model/Customer");
+const TaskModel = require("./model/Task");
+const ConsultantModel = require("./model/Consultant");
+const ContractModel = require("./model/Contract");
+const ProductModel = require("./model/Product");
+
+// const apiRouter = express.Router();
+// const apiRouter = express();
+const apiPrePath = '/api'
 dotenv.config(); // Loads from process.env first, then falls back to .env in cwd
 // Fallback for specific path if needed
 if (!process.env.MONGO_URI) {
@@ -23,6 +32,11 @@ const app = express();
 if (process.env.NODE_ENV === "production") {
     app.set('trust proxy', 1); // Required for secure cookies behind proxies like Render
 }
+
+if (process.env.NODE_ENV === "production") {
+    app.set('trust proxy', 1); 
+}
+
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(helmet({
@@ -36,7 +50,10 @@ mongoose
     .then(() => {
         console.log("Connected to MongoDB");
     })
-    .catch((err) => console.error("Failed to connect to MongoDB", err));
+    .catch((err) => {
+        console.log("MongoDB::", process.env.MONGO_URI);
+        console.error("Failed to connect to MongoDB", err)
+    });
 
 app.use(
     cors({
@@ -63,6 +80,10 @@ app.use(session({
     }
 }));
 
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    next();
+});
 
 // Auth middleware
 const authenticate = (req, res, next) => {
@@ -73,7 +94,19 @@ const authenticate = (req, res, next) => {
     }
 };
 
-app.get("/check-session", (req, res) => {
+app.get(`${apiPrePath}/o1`, (req, res) => {
+    res.json({
+        "o": "o1"
+    });
+});
+
+app.get(`${apiPrePath}/o2`, (req, res) => {
+    res.json({
+        "o": "o22"
+    });
+});
+
+app.get(`${apiPrePath}/check-session`, (req, res) => {
     res.json({
         sessionId: req.sessionID,
         authenticated: !!req.session.user,
@@ -82,12 +115,7 @@ app.get("/check-session", (req, res) => {
     });
 });
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
-
-app.post("/signup", async (req, res) => {
+app.post(`${apiPrePath}/signup`, async (req, res) => {
     try {
         const { name, email, password, empId, contactNo, addAsConsultant } = req.body;
         if (!email || !password || !name || !empId) {
@@ -147,7 +175,7 @@ app.post("/signup", async (req, res) => {
     }
 });
 
-app.post("/login", async (req, res) => {
+app.post(`${apiPrePath}/login`, async (req, res) => {
     try {
         const { email, password } = req.body;
         console.log("Login attempt for email:", email);
@@ -185,7 +213,7 @@ app.post("/login", async (req, res) => {
     }
 });
 
-app.post("/logout", (req, res) => {
+app.post(`${apiPrePath}/logout`, (req, res) => {
     if (req.session) {
         req.session.destroy((err) => {
             if (err) {
@@ -199,7 +227,7 @@ app.post("/logout", (req, res) => {
     }
 });
 
-app.get("/user", async (req, res) => {
+app.get(`${apiPrePath}/user`, async (req, res) => {
     if (req.session.user) {
         try {
             const user = await UserModel.findById(req.session.user.id);
@@ -228,7 +256,7 @@ app.get("/user", async (req, res) => {
     }
 });
 
-app.get("/users", async (req, res) => {
+app.get(`${apiPrePath}/users`, async (req, res) => {
     try {
         console.log(`[/users] SID: ${req.sessionID.substring(0,8)} | Auth: ${!!req.session.user} | Role: ${req.session?.user?.role || 'NONE'}`);
         if (!req.session.user || req.session.user.role !== 'admin') {
@@ -243,11 +271,11 @@ app.get("/users", async (req, res) => {
     }
 });
 
-app.get("/test-auth", (req, res) => {
+app.get(`${apiPrePath}/test-auth`, (req, res) => {
     res.json({ session: !!req.session, user: req.session.user || "No user in session" });
 });
 
-app.put("/users/:id", async (req, res) => {
+app.put(`${apiPrePath}/:id`, async (req, res) => {
     try {
         const { id } = req.params;
         const { name, email, role, empId, contactNo, profileImage } = req.body;
@@ -262,7 +290,7 @@ app.put("/users/:id", async (req, res) => {
     }
 });
 
-app.patch("/users/:id/password", async (req, res) => {
+app.patch(`${apiPrePath}/:id/password`, async (req, res) => {
     try {
         const { id } = req.params;
         const { password } = req.body;
@@ -277,7 +305,7 @@ app.patch("/users/:id/password", async (req, res) => {
     }
 });
 
-app.delete("/users/:id", async (req, res) => {
+app.delete(`${apiPrePath}/:id`, async (req, res) => {
     try {
         const { id } = req.params;
         await UserModel.findByIdAndDelete(id);
@@ -287,13 +315,7 @@ app.delete("/users/:id", async (req, res) => {
     }
 });
 
-const CustomerModel = require("./model/Customer");
-const TaskModel = require("./model/Task");
-const ConsultantModel = require("./model/Consultant");
-const ContractModel = require("./model/Contract");
-const ProductModel = require("./model/Product");
-
-app.get("/consultants", async (req, res) => {
+app.get(`${apiPrePath}/consultants`, async (req, res) => {
     try {
         const consultants = await ConsultantModel.find();
         res.json(consultants);
@@ -302,7 +324,7 @@ app.get("/consultants", async (req, res) => {
     }
 });
 
-app.post("/consultants", async (req, res) => {
+app.post(`${apiPrePath}/consultants`, async (req, res) => {
     try {
         const { consultantId, name, email } = req.body;
         const newConsultant = new ConsultantModel({ consultantId, name, email });
@@ -313,7 +335,7 @@ app.post("/consultants", async (req, res) => {
     }
 });
 
-app.put("/consultants/:id", async (req, res) => {
+app.put(`${apiPrePath}/consultants/:id`, async (req, res) => {
     try {
         const { id } = req.params;
         const { consultantId, name, email } = req.body;
@@ -328,7 +350,7 @@ app.put("/consultants/:id", async (req, res) => {
     }
 });
 
-app.delete("/consultants/:id", async (req, res) => {
+app.delete(`${apiPrePath}/consultants/:id`, async (req, res) => {
     try {
         const { id } = req.params;
         await ConsultantModel.findByIdAndDelete(id);
@@ -338,7 +360,7 @@ app.delete("/consultants/:id", async (req, res) => {
     }
 });
 
-app.post("/customers", async (req, res) => {
+app.post(`${apiPrePath}/customers`, async (req, res) => {
     try {
         const {
             customerId,
@@ -381,7 +403,7 @@ app.post("/customers", async (req, res) => {
     }
 });
 
-app.get("/customers", async (req, res) => {
+app.get(`${apiPrePath}/customers`, async (req, res) => {
     try {
         const customers = await CustomerModel.find();
         res.json(customers);
@@ -390,7 +412,7 @@ app.get("/customers", async (req, res) => {
     }
 });
 
-app.put("/customers/:id", async (req, res) => {
+app.put(`${apiPrePath}/customers/:id`, async (req, res) => {
     try {
         const { id } = req.params;
         const {
@@ -414,7 +436,7 @@ app.put("/customers/:id", async (req, res) => {
     }
 });
 
-app.delete("/customers/:id", async (req, res) => {
+app.delete(`${apiPrePath}/customers/:id`, async (req, res) => {
     try {
         const { id } = req.params;
         await CustomerModel.findByIdAndDelete(id);
@@ -424,7 +446,7 @@ app.delete("/customers/:id", async (req, res) => {
     }
 });
 
-app.get("/products", async (req, res) => {
+app.get(`${apiPrePath}/products`, async (req, res) => {
     try {
         const products = await ProductModel.find();
         res.json(products);
@@ -433,7 +455,7 @@ app.get("/products", async (req, res) => {
     }
 });
 
-app.post("/products", async (req, res) => {
+app.post(`${apiPrePath}/products`, async (req, res) => {
     try {
         const { productId, name, description } = req.body;
 
@@ -458,7 +480,7 @@ app.post("/products", async (req, res) => {
     }
 });
 
-app.put("/products/:id", async (req, res) => {
+app.put(`${apiPrePath}/products/:id`, async (req, res) => {
     try {
         const { id } = req.params;
         const { productId, name, description } = req.body;
@@ -473,7 +495,7 @@ app.put("/products/:id", async (req, res) => {
     }
 });
 
-app.delete("/products/:id", async (req, res) => {
+app.delete(`${apiPrePath}/products/:id`, async (req, res) => {
     try {
         const { id } = req.params;
         await ProductModel.findByIdAndDelete(id);
@@ -483,7 +505,7 @@ app.delete("/products/:id", async (req, res) => {
     }
 });
 
-app.post("/contracts", async (req, res) => {
+app.post(`${apiPrePath}/contracts`, async (req, res) => {
     try {
         const { 
             contractId, 
@@ -544,7 +566,7 @@ app.post("/contracts", async (req, res) => {
     }
 });
 
-app.get("/contracts", async (req, res) => {
+app.get(`${apiPrePath}/contracts`, async (req, res) => {
     try {
         const contracts = await ContractModel.find()
             .populate("product", "name")
@@ -570,7 +592,7 @@ app.get("/contracts", async (req, res) => {
     }
 });
 
-app.put("/contracts/:id", async (req, res) => {
+app.put(`${apiPrePath}/contracts/:id`, async (req, res) => {
     try {
         const { id } = req.params;
         const { 
@@ -620,7 +642,7 @@ app.put("/contracts/:id", async (req, res) => {
     }
 });
 
-app.delete("/contracts/:id", async (req, res) => {
+app.delete(`${apiPrePath}/contracts/:id`, async (req, res) => {
     try {
         const { id } = req.params;
         await ContractModel.findByIdAndDelete(id);
@@ -630,7 +652,7 @@ app.delete("/contracts/:id", async (req, res) => {
     }
 });
 
-app.post("/tasks", authenticate, async (req, res) => {
+app.post(`${apiPrePath}/tasks`, authenticate, async (req, res) => {
     try {
         const {
             customer,
@@ -677,7 +699,7 @@ app.post("/tasks", authenticate, async (req, res) => {
     }
 });
 
-app.put("/tasks/:id", authenticate, async (req, res) => {
+app.put(`${apiPrePath}/tasks/:id`, authenticate, async (req, res) => {
     try {
         const { id } = req.params;
         const {
@@ -720,7 +742,7 @@ app.put("/tasks/:id", authenticate, async (req, res) => {
     }
 });
 
-app.get("/tasks", async (req, res) => {
+app.get(`${apiPrePath}/tasks`, async (req, res) => {
     try {
         const tasks = await TaskModel.find()
             .populate("customer", "name")
@@ -733,7 +755,7 @@ app.get("/tasks", async (req, res) => {
     }
 });
 
-app.delete("/tasks/:id", authenticate, async (req, res) => {
+app.delete(`${apiPrePath}/tasks/:id`, authenticate, async (req, res) => {
     try {
         const { id } = req.params;
         const task = await TaskModel.findById(id);
@@ -752,15 +774,16 @@ app.delete("/tasks/:id", authenticate, async (req, res) => {
     }
 });
 
-// Production: Serve static files and catch-all for React routing
-if (process.env.NODE_ENV === "production" || process.env.SERVE_STATIC === "true") {
-    const buildPath = path.join(__dirname, "../client/dist");
-    app.use(express.static(buildPath));
-    app.get(/.*/, (req, res) => {
-        if (!req.path.startsWith("/api")) { // Use req.path instead of req.url for cleaner matching
-            res.sendFile(path.join(buildPath, "index.html"));
-        } else {
-            res.status(404).json({ error: "API route not found" });
-        }
-    });
-}
+app.use((req, res, next) => {
+  res.status(404).send("Sorry, we couldn't find that!");
+});
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something Went Wrong!');
+});
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
