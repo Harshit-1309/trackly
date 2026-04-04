@@ -18,7 +18,7 @@ const OverviewSection = ({ user, counts, setActiveSection }) => {
                     Welcome, {user?.name || "User"}
                 </Typography>
                 <Typography variant="h6" color="textSecondary">
-                    Here's what's happening 2day.
+                    Here's what's happening today.
                 </Typography>
             </Box>
             <Typography variant="h5" sx={{ mb: 2, fontWeight: 'bold' }}>Dashboard Overview</Typography>
