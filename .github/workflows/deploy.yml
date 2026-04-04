@@ -24,7 +24,7 @@ jobs:
 
       - name: Build Frontend exactly on GitHub Servers
         env:
-          VITE_API_URL: "http://46.28.44.11:5000"
+          VITE_API_URL: "/api"
         run: |
           cd client
           npm install
