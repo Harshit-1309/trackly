@@ -39,6 +39,18 @@ app.use((req, res, next) => {
     next();
 });
 
+// Nginx API Proxy Compatibility Middleware
+// Automatically strips '/api' prefix so the backend can natively accept Nginx proxy requests
+// without requiring Nginx configuration changes or route redefinitions.
+app.use((req, res, next) => {
+    if (req.url.startsWith('/api/')) {
+        req.url = req.url.replace(/^\/api/, '');
+    } else if (req.url === '/api') {
+        req.url = '/';
+    }
+    next();
+});
+
 mongoose
     .connect(process.env.MONGO_URI)
     .then(() => {

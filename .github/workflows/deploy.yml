@@ -23,6 +23,8 @@ jobs:
           node-version: '20'
 
       - name: Build Frontend exactly on GitHub Servers
+        env:
+          VITE_API_URL: "/api"
         run: |
           cd client
           npm install
