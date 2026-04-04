@@ -57,6 +57,9 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           script: |
-            cd /root/application/trackly/server
+            # Sync the fresh code (frontend and backend) to Nginx's live directory
+            rsync -avz /root/application/trackly/ /var/www/trackly/
+            
+            cd /var/www/trackly/server
             npm install
             pm2 restart all
