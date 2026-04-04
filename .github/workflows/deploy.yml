@@ -31,7 +31,7 @@ jobs:
             # path where your application is hosted on your Hostinger VPS.
             # Example: cd /var/www/timetracker
             # -------------------------------------------------------------
-            cd /path/to/your/project
+            cd /root/application/trackly
             
             # Pull the latest code from the main branch
             git restore .
