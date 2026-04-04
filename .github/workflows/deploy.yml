@@ -22,7 +22,7 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          password: ${{ secrets.PASSWORD }}
           # Increase the timeout if the server is slow or builds take a long time
           timeout: 10m
           script: |
