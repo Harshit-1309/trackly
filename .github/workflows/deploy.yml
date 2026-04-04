@@ -1,0 +1,61 @@
+name: Deploy to Hostinger VPS
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Allows you to manually trigger the workflow from GitHub Actions tab
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to VPS using SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          # Increase the timeout if the server is slow or builds take a long time
+          timeout: 10m
+          script: |
+            # -------------------------------------------------------------
+            # IMPORTANT: Change '/path/to/your/project' to the EXACT absolute
+            # path where your application is hosted on your Hostinger VPS.
+            # Example: cd /var/www/timetracker
+            # -------------------------------------------------------------
+            cd /path/to/your/project
+            
+            # Pull the latest code from the main branch
+            git restore .
+            git pull origin main
+            
+            # Install Server Dependencies
+            echo "Installing Server Dependencies..."
+            cd server
+            npm ci || npm install
+            
+            # Install Client Dependencies
+            echo "Installing Client Dependencies..."
+            cd ../client
+            npm ci || npm install
+            
+            # Build the Client
+            echo "Building the Frontend..."
+            npm run build
+            
+            # Restart Application
+            echo "Restarting the Application..."
+            # -------------------------------------------------------------
+            # IMPORTANT: Update the below line depending on how you run your
+            # server. If you use pm2:
+            # pm2 restart server
+            # 
+            # Or if you use systemd:
+            # sudo systemctl restart timetracker
+            # -------------------------------------------------------------
+            pm2 restart all

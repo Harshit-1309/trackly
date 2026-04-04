@@ -31,6 +31,14 @@ app.use(helmet({
 app.use(compression());
 app.use(morgan("combined")); // Standard production logging
 
+// Method override to bypass Hostinger restrictive firewalls for PUT/PATCH/DELETE methods
+app.use((req, res, next) => {
+    if (req.headers['x-http-method-override']) {
+        req.method = req.headers['x-http-method-override'].toUpperCase();
+    }
+    next();
+});
+
 mongoose
     .connect(process.env.MONGO_URI)
     .then(() => {
