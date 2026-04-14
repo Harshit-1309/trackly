@@ -746,7 +746,7 @@ app.get("/tasks", async (req, res) => {
             .populate("customer", "name")
             .populate("consultant", "name")
             .populate("contract")
-            .populate("createdBy", "name");
+            .populate("createdBy", "name profileImage");
         res.json(tasks);
     } catch (err) {
         res.status(500).json({ error: err.message });

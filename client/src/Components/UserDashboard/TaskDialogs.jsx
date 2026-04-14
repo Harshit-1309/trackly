@@ -118,8 +118,11 @@ const TaskDialogs = ({
                                 <Grid container spacing={3}>
                                     <Grid item xs={12} sm={6}>
                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                            <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.light', color: 'primary.main' }}>
-                                                <PersonIcon sx={{ fontSize: 18 }} />
+                                            <Avatar 
+                                                src={selectedTask.createdBy?.profileImage || (selectedTask.createdBy === user?.id || selectedTask.createdBy?._id === user?.id ? user?.profileImage : '')}
+                                                sx={{ width: 32, height: 32, bgcolor: 'primary.light', color: 'primary.main' }}
+                                            >
+                                                {!selectedTask.createdBy?.profileImage && (selectedTask.createdBy !== user?.id && selectedTask.createdBy?._id !== user?.id || !user?.profileImage) && <PersonIcon sx={{ fontSize: 18 }} />}
                                             </Avatar>
                                             <Box>
                                                 <Typography variant="caption" color="textSecondary" sx={{ fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.5 }}>Logged By</Typography>
