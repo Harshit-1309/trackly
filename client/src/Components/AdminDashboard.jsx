@@ -110,8 +110,9 @@ const AdminDashboard = ({ mobileOpen, handleDrawerToggle }) => {
 
   const fetchConsultants = () => {
     axios
-      .get(`${API_BASE_URL}/consultants`)
+      .get(`${API_BASE_URL}/consultants`, { withCredentials: true })
       .then((res) => setConsultants(res.data))
+
       .catch((err) => {
         console.error("Fetch consultants error:", err);
         toast.error(err.response?.data?.error || "Failed to fetch consultants");
@@ -120,8 +121,9 @@ const AdminDashboard = ({ mobileOpen, handleDrawerToggle }) => {
 
   const fetchUsers = () => {
     axios
-      .get(`${API_BASE_URL}/users`)
+      .get(`${API_BASE_URL}/users`, { withCredentials: true })
       .then((res) => setUsers(res.data))
+
       .catch((err) => {
         console.error("Fetch users error:", err);
         if (err.response?.status !== 401) {
@@ -132,8 +134,9 @@ const AdminDashboard = ({ mobileOpen, handleDrawerToggle }) => {
 
   const fetchContracts = () => {
     axios
-      .get(`${API_BASE_URL}/contracts`)
+      .get(`${API_BASE_URL}/contracts`, { withCredentials: true })
       .then((res) => setContracts(res.data))
+
       .catch((err) => {
         console.error("Fetch contracts error:", err);
         toast.error(err.response?.data?.error || "Failed to fetch contracts");
@@ -142,8 +145,9 @@ const AdminDashboard = ({ mobileOpen, handleDrawerToggle }) => {
 
   const fetchProducts = () => {
     axios
-      .get(`${API_BASE_URL}/products`)
+      .get(`${API_BASE_URL}/products`, { withCredentials: true })
       .then((res) => setProducts(res.data))
+
       .catch((err) => {
         console.error("Fetch products error:", err);
         toast.error(err.response?.data?.error || "Failed to fetch products");
@@ -152,24 +156,14 @@ const AdminDashboard = ({ mobileOpen, handleDrawerToggle }) => {
 
   useEffect(() => {
     if (user && user.role === "admin") {
-      const timer = setTimeout(() => {
-        axios.get(`${API_BASE_URL}/check-session`)
-          .then(res => {
-            if (res.data.authenticated && res.data.role === 'admin') {
-              fetchCustomers();
-              fetchConsultants();
-              fetchUsers();
-              fetchContracts();
-              fetchProducts();
-            }
-          })
-          .catch(err => {
-            // Session check failed, silently ignore
-          });
-      }, 1000);
-      return () => clearTimeout(timer);
+      fetchCustomers();
+      fetchConsultants();
+      fetchUsers();
+      fetchContracts();
+      fetchProducts();
     }
   }, [user]);
+
 
   const resetForms = () => {
     setEditingId(null);

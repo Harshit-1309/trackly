@@ -12,6 +12,13 @@ const helmet = require("helmet");
 const compression = require("compression");
 const morgan = require("morgan");
 const UserModel = require("./model/User");
+const dns = require("dns");
+
+// Fix for Windows DNS resolution issues in Node.js 18+
+if (dns.setDefaultResultOrder) {
+    dns.setDefaultResultOrder("ipv4first");
+}
+
 
 dotenv.config(); // Loads from process.env first, then falls back to .env in cwd
 // Fallback for specific path if needed
@@ -72,8 +79,12 @@ app.use(session({
     saveUninitialized: false, 
     store: MongoStore.create({
         mongoUrl: process.env.MONGO_URI,
-        ttl: 24 * 60 * 60
+        ttl: 24 * 60 * 60,
+        autoRemove: 'native'
     }),
+
+
+
     cookie: { 
         maxAge: 24 * 60 * 60 * 1000,
         httpOnly: true,
