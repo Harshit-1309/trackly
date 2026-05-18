@@ -19,6 +19,7 @@ const TaskFormSection = ({
     customers,
     consultants,
     contracts,
+    projects = [],
     isMobile,
     handlers
 }) => {
@@ -45,18 +46,28 @@ const TaskFormSection = ({
                                 {consultants.map(c => <MenuItem key={c._id} value={c._id}>{c.name}</MenuItem>)}
                             </TextField>
                         </Box>
-                        <TextField select fullWidth label="Select Contract" name="contract" value={taskForm.contract} onChange={handleTaskChange} sx={{ '& .MuiOutlinedInput-root': { borderRadius: 3 } }}>
-                            <MenuItem value=""><em>General Support (No Specific Contract)</em></MenuItem>
-                            {contracts
-                                .filter(c => c.contractStatus === 'Active' || c._id === taskForm.contract)
-                                .map(c => (
-                                    <MenuItem key={c._id} value={c._id}>
-                                        {c.contractName} {c.contractStatus === 'Expired' ? '(Expired)' : ''}
-                                    </MenuItem>
-                                ))
-                            }
-
-                        </TextField>
+                        <Box sx={{ display: 'flex', gap: 2, flexDirection: isMobile ? 'column' : 'row' }}>
+                            <TextField select fullWidth label="Select Contract" name="contract" value={taskForm.contract} onChange={handleTaskChange} sx={{ '& .MuiOutlinedInput-root': { borderRadius: 3 } }}>
+                                <MenuItem value=""><em>General Support (No Specific Contract)</em></MenuItem>
+                                {contracts
+                                    .filter(c => c.contractStatus === 'Active' || c._id === taskForm.contract)
+                                    .map(c => (
+                                        <MenuItem key={c._id} value={c._id}>
+                                            {c.contractName} {c.contractStatus === 'Expired' ? '(Expired)' : ''}
+                                        </MenuItem>
+                                    ))
+                                }
+                            </TextField>
+                            <TextField select fullWidth label="Select Project" name="project" value={taskForm.project} onChange={handleTaskChange} sx={{ '& .MuiOutlinedInput-root': { borderRadius: 3 } }}>
+                                <MenuItem value=""><em>N/A</em></MenuItem>
+                                {projects
+                                    .filter(p => !taskForm.customer || (p.customer?._id || p.customer) === taskForm.customer)
+                                    .map(p => (
+                                        <MenuItem key={p._id} value={p._id}>{p.name}</MenuItem>
+                                    ))
+                                }
+                            </TextField>
+                        </Box>
 
                         <TextField fullWidth multiline rows={4} label="Task Description" name="description" value={taskForm.description} onChange={handleTaskChange} required sx={{ '& .MuiOutlinedInput-root': { borderRadius: 3 } }} />
 

@@ -16,12 +16,14 @@ import BusinessIcon from '@mui/icons-material/Business';
 import EngineeringIcon from '@mui/icons-material/Engineering';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import AddBoxIcon from '@mui/icons-material/AddBox';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 
 const Sidebar = ({ activeSection, setActiveSection, isMobile, handleDrawerToggle, navigate }) => {
   const menuItems = [
     { text: 'Overview', icon: <DashboardIcon /> },
     { text: 'Users', icon: <PeopleIcon /> },
     { text: 'Products', icon: <InventoryIcon /> },
+    { text: 'Projects', icon: <AssignmentIcon /> },
     { text: 'Contracts', icon: <ReceiptLongIcon /> },
     { text: 'Customers', icon: <BusinessIcon /> },
     { text: 'Consultants', icon: <EngineeringIcon /> },

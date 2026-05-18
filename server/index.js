@@ -323,6 +323,7 @@ const TaskModel = require("./model/Task");
 const ConsultantModel = require("./model/Consultant");
 const ContractModel = require("./model/Contract");
 const ProductModel = require("./model/Product");
+const ProjectModel = require("./model/Project");
 
 app.get("/consultants", async (req, res) => {
     try {
@@ -514,6 +515,70 @@ app.delete("/products/:id", async (req, res) => {
     }
 });
 
+app.get("/projects", async (req, res) => {
+    try {
+        const projects = await ProjectModel.find().populate("customer", "name");
+        res.json(projects);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post("/projects", async (req, res) => {
+    try {
+        const { projectId, name, customer, hours } = req.body;
+
+        // Auto-generate projectId if not provided
+        let finalProjectId = projectId;
+        if (!finalProjectId || finalProjectId === "") {
+            const prefix = (name || "PRJ").slice(0, 3).toUpperCase();
+            let isUnique = false;
+            while (!isUnique) {
+                const randomDigits = Math.floor(10000 + Math.random() * 90000).toString();
+                finalProjectId = `${prefix}${randomDigits}`;
+                const existing = await ProjectModel.findOne({ projectId: finalProjectId });
+                if (!existing) isUnique = true;
+            }
+        }
+
+        const newProject = new ProjectModel({ 
+            projectId: finalProjectId, 
+            name, 
+            customer: customer || null, 
+            hours: hours || 0 
+        });
+        await newProject.save();
+        res.status(201).json(newProject);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.put("/projects/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { projectId, name, customer, hours } = req.body;
+        const updatedProject = await ProjectModel.findByIdAndUpdate(
+            id,
+            { projectId, name, customer: customer || null, hours: hours || 0 },
+            { new: true }
+        ).populate("customer", "name");
+        res.json(updatedProject);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.delete("/projects/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        await ProjectModel.findByIdAndDelete(id);
+        res.json({ message: "Project deleted successfully" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.post("/contracts", async (req, res) => {
     try {
         const { 
@@ -672,6 +737,7 @@ app.post("/tasks", authenticate, async (req, res) => {
             timeTaken,
             status,
             contract,
+            project,
             createdBy,
         } = req.body;
         const tasks = await TaskModel.find({}, { taskId: 1 });
@@ -699,6 +765,7 @@ app.post("/tasks", authenticate, async (req, res) => {
             timeTaken,
             status: status || "Open",
             contract: contract || null,
+            project: project || null,
             createdBy: finalCreatedBy,
         });
         await newTask.save();
@@ -720,6 +787,7 @@ app.put("/tasks/:id", authenticate, async (req, res) => {
             timeTaken,
             status,
             contract,
+            project,
             createdBy,
         } = req.body;
 
@@ -735,7 +803,7 @@ app.put("/tasks/:id", authenticate, async (req, res) => {
             return res.status(403).json({ error: "Unauthorized to edit this task" });
         }
 
-        const updateData = { customer, consultant, description, startTime, endTime, timeTaken, status, contract };
+        const updateData = { customer, consultant, description, startTime, endTime, timeTaken, status, contract, project: project || null };
         if (isAdmin && createdBy) {
             updateData.createdBy = createdBy;
         }
@@ -757,6 +825,7 @@ app.get("/tasks", async (req, res) => {
             .populate("customer", "name")
             .populate("consultant", "name")
             .populate("contract")
+            .populate("project")
             .populate("createdBy", "name profileImage");
         res.json(tasks);
     } catch (err) {

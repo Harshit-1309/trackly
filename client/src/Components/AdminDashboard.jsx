@@ -60,6 +60,13 @@ const AdminDashboard = ({ mobileOpen, handleDrawerToggle }) => {
     name: "",
     description: "",
   });
+  const [projects, setProjects] = useState([]);
+  const [projectForm, setProjectForm] = useState({
+    projectId: "",
+    name: "",
+    customer: "",
+    hours: "",
+  });
   const [contracts, setContracts] = useState([]);
   const [contractForm, setContractForm] = useState({
     contractId: "",
@@ -154,6 +161,16 @@ const AdminDashboard = ({ mobileOpen, handleDrawerToggle }) => {
       });
   };
 
+  const fetchProjects = () => {
+    axios
+      .get(`${API_BASE_URL}/projects`, { withCredentials: true })
+      .then((res) => setProjects(res.data))
+      .catch((err) => {
+        console.error("Fetch projects error:", err);
+        toast.error(err.response?.data?.error || "Failed to fetch projects");
+      });
+  };
+
   useEffect(() => {
     if (user && user.role === "admin") {
       fetchCustomers();
@@ -161,6 +178,7 @@ const AdminDashboard = ({ mobileOpen, handleDrawerToggle }) => {
       fetchUsers();
       fetchContracts();
       fetchProducts();
+      fetchProjects();
     }
   }, [user]);
 
@@ -209,6 +227,7 @@ const AdminDashboard = ({ mobileOpen, handleDrawerToggle }) => {
       customer: "",
     });
     setProductForm({ productId: "", name: "", description: "" });
+    setProjectForm({ projectId: "", name: "", customer: "", hours: "" });
   };
 
   const handleEdit = (item, type) => {
@@ -267,6 +286,13 @@ const AdminDashboard = ({ mobileOpen, handleDrawerToggle }) => {
         name: item.name,
         description: item.description || "",
       });
+    } else if (type === "project") {
+      setProjectForm({
+        projectId: item.projectId,
+        name: item.name,
+        customer: item.customer?._id || item.customer || "",
+        hours: item.hours || "",
+      });
     }
   };
 
@@ -281,6 +307,7 @@ const AdminDashboard = ({ mobileOpen, handleDrawerToggle }) => {
         if (type === "consultant") setConsultants(consultants.filter((c) => c._id !== id));
         if (type === "contract") setContracts(contracts.filter((c) => c._id !== id));
         if (type === "product") setProducts(products.filter((p) => p._id !== id));
+        if (type === "project") setProjects(projects.filter((p) => p._id !== id));
         setDeleteDialogOpen(false);
       })
       .catch((err) => toast.error("Error deleting: " + (err.response?.data?.error || err.message)));
@@ -308,6 +335,10 @@ const AdminDashboard = ({ mobileOpen, handleDrawerToggle }) => {
       url = editingId ? `${API_BASE_URL}/products/${editingId}` : `${API_BASE_URL}/products`;
       method = editingId ? "put" : "post";
       data = productForm;
+    } else if (type === 'project') {
+      url = editingId ? `${API_BASE_URL}/projects/${editingId}` : `${API_BASE_URL}/projects`;
+      method = editingId ? "put" : "post";
+      data = projectForm;
     } else if (type === 'contract') {
       url = editingId ? `${API_BASE_URL}/contracts/${editingId}` : `${API_BASE_URL}/contracts`;
       method = editingId ? "put" : "post";
@@ -332,6 +363,10 @@ const AdminDashboard = ({ mobileOpen, handleDrawerToggle }) => {
         } else if (type === 'product') {
           if (editingId) setProducts(products.map(p => p._id === editingId ? res.data : p));
           else setProducts([...products, res.data]);
+        } else if (type === 'project') {
+          if (editingId) setProjects(projects.map(p => p._id === editingId ? res.data : p));
+          else setProjects([...projects, res.data]);
+          fetchProjects(); // For population
         } else if (type === 'contract') {
           if (editingId) setContracts(contracts.map(c => c._id === editingId ? res.data : c));
           else setContracts([...contracts, res.data]);
@@ -378,6 +413,7 @@ const AdminDashboard = ({ mobileOpen, handleDrawerToggle }) => {
       return <OverviewSection user={user} counts={{
         users: users.length,
         products: products.length,
+        projects: projects.length,
         contracts: contracts.length,
         customers: customers.length,
         consultants: consultants.length
@@ -387,7 +423,7 @@ const AdminDashboard = ({ mobileOpen, handleDrawerToggle }) => {
     return (
       <ManagementSections
         activeSection={activeSection}
-        data={{ users, customers, consultants, products, contracts }}
+        data={{ users, customers, consultants, products, projects, contracts }}
         handlers={{
           onAdd: (type) => { resetForms(); setEditType(type); setIsFormDialogOpen(true); },
           onActionMenuOpen: (e, item, type) => {
@@ -434,13 +470,13 @@ const AdminDashboard = ({ mobileOpen, handleDrawerToggle }) => {
             isInfoOpen: isInfoDialogOpen
           }}
           forms={{
-            userForm, customerForm, consultantForm, productForm, contractForm,
+            userForm, customerForm, consultantForm, productForm, projectForm, contractForm,
             passwordForm: { newPassword, confirmPassword }
           }}
           editingState={{ editingId, editType }}
           selectedData={{ selectedItem: { ...selectedItemInMenu, type: itemTypeInMenu }, selectedUserInfo }}
           menuAnchorEl={actionMenuAnchorEl}
-          selectData={{ products, customers }}
+          selectData={{ products, projects, customers }}
           theme={theme}
           handlers={{
             onCloseAll: () => {
@@ -454,6 +490,7 @@ const AdminDashboard = ({ mobileOpen, handleDrawerToggle }) => {
             onCustomerChange: (e) => setCustomerForm({ ...customerForm, [e.target.name]: e.target.value }),
             onConsultantChange: (e) => setConsultantForm({ ...consultantForm, [e.target.name]: e.target.value }),
             onProductChange: (e) => setProductForm({ ...productForm, [e.target.name]: e.target.value }),
+            onProjectChange: (e) => setProjectForm({ ...projectForm, [e.target.name]: e.target.value }),
             onContractChange: (e) => setContractForm({ ...contractForm, [e.target.name]: e.target.value }),
             onFileChange: handleFileChange,
             onPasswordChange: (type, val) => type === 'new' ? setNewPassword(val) : setConfirmPassword(val),

@@ -12,11 +12,13 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import AddBoxIcon from '@mui/icons-material/AddBox';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 
 const Sidebar = ({ activeSection, setActiveSection, isMobile, handleDrawerToggle }) => {
     const menuItems = [
         { text: 'Overview', icon: <DashboardIcon /> },
         { text: 'Contracts', icon: <ReceiptLongIcon /> },
+        { text: 'Projects', icon: <AssignmentIcon /> },
         { text: 'Manage Tasks', icon: <TableChartIcon /> },
         { text: 'New Task', icon: <AddBoxIcon /> }
     ];

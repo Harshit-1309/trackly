@@ -23,7 +23,7 @@ const ManagementSections = ({
     expandedContracts,
     toggleContractExpand
 }) => {
-    const { users, customers, consultants, products, contracts } = data;
+    const { users, customers, consultants, products, projects, contracts } = data;
     const { onAdd, onActionMenuOpen } = handlers;
 
     if (activeSection === 'users') {
@@ -229,6 +229,56 @@ const ManagementSections = ({
                                         <td style={{ padding: "8px" }}>{p.description || "N/A"}</td>
                                         <td style={{ padding: "8px" }}>
                                             <IconButton color="inherit" onClick={(e) => onActionMenuOpen(e, p, 'product')}>
+                                                <MoreVertIcon />
+                                            </IconButton>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </Box>
+                </Box>
+            </Box>
+        );
+    }
+
+    if (activeSection === 'projects') {
+        return (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                <Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                        <Typography variant="h5" sx={{ fontWeight: 'bold' }}>Project List</Typography>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            startIcon={<AddIcon />}
+                            onClick={() => onAdd('project')}
+                            size="small"
+                            sx={{ py: 1, px: 2, fontWeight: 'bold' }}
+                        >
+                            Add Project
+                        </Button>
+                    </Box>
+                    <Box sx={{ overflowX: 'auto', width: '100%' }}>
+                        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                            <thead>
+                                <tr style={{ borderBottom: "1px solid #ddd" }}>
+                                    <th style={{ textAlign: "left", padding: "8px" }}>Project ID</th>
+                                    <th style={{ textAlign: "left", padding: "8px" }}>Name</th>
+                                    <th style={{ textAlign: "left", padding: "8px" }}>Customer Associated</th>
+                                    <th style={{ textAlign: "left", padding: "8px" }}>Total Allotted Hours</th>
+                                    <th style={{ textAlign: "left", padding: "8px" }}>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {projects.map((p) => (
+                                    <tr key={p._id} style={{ borderBottom: "1px solid #eee" }}>
+                                        <td style={{ padding: "8px" }}>{p.projectId}</td>
+                                        <td style={{ padding: "8px" }}>{p.name}</td>
+                                        <td style={{ padding: "8px" }}>{p.customer?.name || "N/A"}</td>
+                                        <td style={{ padding: "8px" }}>{p.hours || 0}</td>
+                                        <td style={{ padding: "8px" }}>
+                                            <IconButton color="inherit" onClick={(e) => onActionMenuOpen(e, p, 'project')}>
                                                 <MoreVertIcon />
                                             </IconButton>
                                         </td>

@@ -45,6 +45,10 @@ const TaskSchema = new mongoose.Schema({
     contract: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "contracts"
+    },
+    project: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "projects"
     }
 }, { timestamps: true });
 

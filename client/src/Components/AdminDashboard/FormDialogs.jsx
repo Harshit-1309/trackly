@@ -68,13 +68,14 @@ const FormDialogs = ({
         customerForm,
         consultantForm,
         productForm,
+        projectForm,
         contractForm,
         passwordForm
     } = forms;
 
     const { editingId, editType } = editingState;
     const { selectedItem, selectedUserInfo } = selectedData;
-    const { products, customers } = selectData;
+    const { products, projects, customers } = selectData;
 
     const {
         onCloseAll,
@@ -215,6 +216,42 @@ const FormDialogs = ({
                                 )}
                                 <TextField fullWidth label="Product Name" name="name" value={productForm.name} onChange={onProductChange} required variant="outlined" />
                                 <TextField fullWidth multiline rows={3} label="Description" name="description" value={productForm.description} onChange={onProductChange} variant="outlined" />
+                            </Box>
+                            <DialogActions sx={{ px: 0, pt: 3 }}>
+                                <Button onClick={onCloseAll} sx={{ fontWeight: 'bold' }}>Cancel</Button>
+                                <Button type="submit" variant="contained" sx={{ fontWeight: 'bold', px: 4, borderRadius: 2 }}>{editingId ? 'Update' : 'Add'}</Button>
+                            </DialogActions>
+                        </form>
+                    )}
+
+                    {editType === "project" && (
+                        <form onSubmit={(e) => onFormSubmit(e, 'project')}>
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, pt: 2, pb: 1 }}>
+                                {editingId && (
+                                    <TextField
+                                        fullWidth
+                                        label="Project ID"
+                                        name="projectId"
+                                        value={projectForm.projectId}
+                                        disabled
+                                        variant="outlined"
+                                    />
+                                )}
+                                <TextField fullWidth label="Project Name" name="name" value={projectForm.name} onChange={handlers.onProjectChange} required variant="outlined" />
+                                <FormControl fullWidth variant="outlined">
+                                    <InputLabel id="project-customer-label">Associate Customer</InputLabel>
+                                    <Select
+                                        labelId="project-customer-label"
+                                        name="customer"
+                                        value={projectForm.customer}
+                                        onChange={handlers.onProjectChange}
+                                        label="Associate Customer"
+                                    >
+                                        <MenuItem value="">None</MenuItem>
+                                        {customers.map((cust) => <MenuItem key={cust._id} value={cust._id}>{cust.name}</MenuItem>)}
+                                    </Select>
+                                </FormControl>
+                                <TextField fullWidth label="Total Allotted Hours" type="number" name="hours" value={projectForm.hours} onChange={handlers.onProjectChange} variant="outlined" />
                             </Box>
                             <DialogActions sx={{ px: 0, pt: 3 }}>
                                 <Button onClick={onCloseAll} sx={{ fontWeight: 'bold' }}>Cancel</Button>
@@ -481,6 +518,18 @@ const FormDialogs = ({
                                 <Typography variant="caption" color="textSecondary" sx={{ fontWeight: 800 }}>DESCRIPTION</Typography>
                                 <Typography variant="body2" sx={{ color: 'text.secondary', whiteSpace: 'pre-wrap' }}>{selectedItem?.description || 'No description available.'}</Typography>
                             </Box>
+                        </Box>
+                    )}
+
+                    {selectedItem?.type === 'project' && (
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            <Typography variant="h6" sx={{ fontWeight: 800 }}>{selectedItem?.name}</Typography>
+                            <Divider />
+                            <Grid container spacing={2}>
+                                <Grid item xs={12} sm={6}><DetailItem label="Project ID" value={selectedItem?.projectId} /></Grid>
+                                <Grid item xs={12} sm={6}><DetailItem label="Total Allotted Hours" value={selectedItem?.hours || 0} /></Grid>
+                                <Grid item xs={12} sm={6}><DetailItem label="Customer" value={selectedItem?.customer?.name || 'N/A'} /></Grid>
+                            </Grid>
                         </Box>
                     )}
 

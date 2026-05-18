@@ -4,7 +4,7 @@
     "description": "Root configuration for TimeTracker project",
     "main": "index.js",
     "scripts": {
-        "server": "npm start --prefix server",
+        "server": "npm run dev --prefix server",
         "client": "npm run dev --prefix client",
         "dev": "concurrently \"npm run server\" \"npm run client\"",
         "build": "npm install --prefix server && npm install --prefix client && npm run build --prefix client",

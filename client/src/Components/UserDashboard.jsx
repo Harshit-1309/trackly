@@ -19,6 +19,7 @@ import Sidebar from './UserDashboard/Sidebar';
 import OverviewSection from './UserDashboard/OverviewSection';
 import TimesheetSection from './UserDashboard/TimesheetSection';
 import ContractSection from './UserDashboard/ContractSection';
+import ProjectSection from './UserDashboard/ProjectSection';
 import TaskFormSection from './UserDashboard/TaskFormSection';
 import TaskDialogs from './UserDashboard/TaskDialogs';
 
@@ -33,9 +34,10 @@ const UserDashboard = ({ mobileOpen, handleDrawerToggle }) => {
     const [customers, setCustomers] = useState([]);
     const [consultants, setConsultants] = useState([]);
     const [contracts, setContracts] = useState([]);
+    const [projects, setProjects] = useState([]);
     const [tasks, setTasks] = useState([]);
     const [taskForm, setTaskForm] = useState({
-        customer: '', consultant: '', description: '', startTime: null, endTime: null, timeTaken: '', status: 'Open', contract: '', createdBy: ''
+        customer: '', consultant: '', description: '', startTime: null, endTime: null, timeTaken: '', status: 'Open', contract: '', project: '', createdBy: ''
     });
     const [editingTaskId, setEditingTaskId] = useState(null);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -48,6 +50,7 @@ const UserDashboard = ({ mobileOpen, handleDrawerToggle }) => {
     const [sortBy, setSortBy] = useState('time');
     const [searchTerm, setSearchTerm] = useState('');
     const [contractSearch, setContractSearch] = useState('');
+    const [projectSearch, setProjectSearch] = useState('');
 
     const [filters, setFilters] = useState({
         filterCustomer: '',
@@ -61,27 +64,30 @@ const UserDashboard = ({ mobileOpen, handleDrawerToggle }) => {
         contractCustomerFilter: '',
         contractTypeFilter: '',
         contractMonthFilter: '',
-        contractYearFilter: ''
+        contractYearFilter: '',
+        projectCustomerFilter: ''
     });
 
     const [anchors, setAnchors] = useState({
         filterMenuAnchorEl: null,
         exportAnchorEl: null,
         filterAnchorEl: null,
-        contractFilterAnchorEl: null
+        contractFilterAnchorEl: null,
+        projectFilterAnchorEl: null
     });
 
     useEffect(() => {
         const load = async () => {
             if (!user) return;
             try {
-                const [cu, co, cn, ta] = await Promise.all([
+                const [cu, co, cn, pr, ta] = await Promise.all([
                     axios.get(`${API_BASE_URL}/customers`),
                     axios.get(`${API_BASE_URL}/consultants`),
                     axios.get(`${API_BASE_URL}/contracts`),
+                    axios.get(`${API_BASE_URL}/projects`),
                     axios.get(`${API_BASE_URL}/tasks`)
                 ]);
-                setCustomers(cu.data); setConsultants(co.data); setContracts(cn.data); setTasks(ta.data);
+                setCustomers(cu.data); setConsultants(co.data); setContracts(cn.data); setProjects(pr.data); setTasks(ta.data);
                 setTaskForm(prev => ({ ...prev, createdBy: user?.id || '' }));
             } catch (e) {
                 if (e.response?.status !== 401) {
@@ -114,7 +120,7 @@ const UserDashboard = ({ mobileOpen, handleDrawerToggle }) => {
             setTasks(res.data);
             setActiveSection('manage tasks');
             setEditingTaskId(null);
-            setTaskForm({ customer: '', consultant: '', description: '', startTime: null, endTime: null, timeTaken: '', status: 'Open', contract: '', createdBy: user?.id || '' });
+            setTaskForm({ customer: '', consultant: '', description: '', startTime: null, endTime: null, timeTaken: '', status: 'Open', contract: '', project: '', createdBy: user?.id || '' });
         } catch (err) {
             const errMsg = err.response?.data?.error || err.response?.data?.detail || "Error saving task";
             toast.error(errMsg);
@@ -132,6 +138,7 @@ const UserDashboard = ({ mobileOpen, handleDrawerToggle }) => {
             timeTaken: t.timeTaken,
             status: t.status || 'Open',
             contract: t.contract?._id || '',
+            project: t.project?._id || '',
             createdBy: t.createdBy?._id || t.createdBy || ''
         });
         setActiveSection('new task');
@@ -221,6 +228,7 @@ const UserDashboard = ({ mobileOpen, handleDrawerToggle }) => {
             'Customer': t.customer?.name || 'N/A',
             'Consultant': t.consultant?.name || 'N/A',
             'Contract': t.contract?.contractName || 'General',
+            'Project': t.project?.name || 'N/A',
             'Description': t.description,
             'Hours': t.timeTaken,
             'Status': t.status || 'Open'
@@ -237,6 +245,7 @@ const UserDashboard = ({ mobileOpen, handleDrawerToggle }) => {
             'Customer': t.customer?.name || 'N/A',
             'Consultant': t.consultant?.name || 'N/A',
             'Contract': t.contract?.contractName || 'General',
+            'Project': t.project?.name || 'N/A',
             'Description': t.description,
             'Hours': t.timeTaken,
             'Status': t.status || 'Open'
@@ -266,6 +275,20 @@ const UserDashboard = ({ mobileOpen, handleDrawerToggle }) => {
     };
 
     const isFilterApplied = filters.filterCustomer || filters.filterConsultant || filters.filterContract || filters.filterProduct || filters.filterMonth !== '' || filters.filterYear !== '' || filters.filterStatus;
+
+    const getFilteredProjects = () => {
+        let filtered = [...projects];
+        if (projectSearch) {
+            const s = projectSearch.toLowerCase();
+            filtered = filtered.filter(p =>
+                p.name?.toLowerCase().includes(s) ||
+                p.projectId?.toLowerCase().includes(s) ||
+                p.customer?.name?.toLowerCase().includes(s)
+            );
+        }
+        if (filters.projectCustomerFilter) filtered = filtered.filter(p => (p.customer?._id || p.customer) === filters.projectCustomerFilter);
+        return filtered;
+    };
 
     const renderContent = () => {
         switch (activeSection) {
@@ -318,6 +341,19 @@ const UserDashboard = ({ mobileOpen, handleDrawerToggle }) => {
                     setAnchors={setAnchors}
                     theme={theme}
                 />;
+            case 'projects':
+                return <ProjectSection
+                    projects={getFilteredProjects()}
+                    tasks={tasks}
+                    customers={customers}
+                    projectSearch={projectSearch}
+                    setProjectSearch={setProjectSearch}
+                    filters={filters}
+                    setFilters={setFilters}
+                    anchors={anchors}
+                    setAnchors={setAnchors}
+                    theme={theme}
+                />;
             case 'new task':
                 return <TaskFormSection
                     taskForm={taskForm}
@@ -325,12 +361,13 @@ const UserDashboard = ({ mobileOpen, handleDrawerToggle }) => {
                     customers={customers}
                     consultants={consultants}
                     contracts={contracts}
+                    projects={projects}
                     isMobile={isMobile}
                     handlers={{
                         handleTaskChange,
                         handleDateChange,
                         handleCreateTask,
-                        onCancelEdit: () => { setEditingTaskId(null); setTaskForm({ customer: '', consultant: '', description: '', startTime: null, endTime: null, timeTaken: '', status: 'Open', contract: '' }); setActiveSection('manage tasks'); }
+                        onCancelEdit: () => { setEditingTaskId(null); setTaskForm({ customer: '', consultant: '', description: '', startTime: null, endTime: null, timeTaken: '', status: 'Open', contract: '', project: '' }); setActiveSection('manage tasks'); }
                     }}
                 />;
             default:

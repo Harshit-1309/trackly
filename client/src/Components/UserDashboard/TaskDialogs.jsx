@@ -206,6 +206,17 @@ const TaskDialogs = ({
                                             </Box>
                                         </Box>
                                     </Grid>
+                                    <Grid item xs={12} sm={6}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                            <Avatar sx={{ width: 32, height: 32, bgcolor: 'secondary.light', color: 'secondary.main' }}>
+                                                <AssignmentIcon sx={{ fontSize: 18 }} />
+                                            </Avatar>
+                                            <Box>
+                                                <Typography variant="caption" color="textSecondary" sx={{ fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.5 }}>Project</Typography>
+                                                <Typography variant="body2" sx={{ fontWeight: 700 }}>{selectedTask.project?.name || 'N/A'}</Typography>
+                                            </Box>
+                                        </Box>
+                                    </Grid>
                                 </Grid>
                             </Box>
 
