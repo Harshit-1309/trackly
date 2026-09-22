@@ -60,6 +60,7 @@ const UserDashboard = ({ mobileOpen, handleDrawerToggle }) => {
         filterMonth: '',
         filterYear: '',
         filterStatus: '',
+        filterProject: '',
         contractStatusFilter: '',
         contractCustomerFilter: '',
         contractTypeFilter: '',
@@ -170,6 +171,7 @@ const UserDashboard = ({ mobileOpen, handleDrawerToggle }) => {
         if (filters.filterMonth !== '') filtered = filtered.filter(t => dayjs(t.startTime).month() === Number(filters.filterMonth));
         if (filters.filterYear !== '') filtered = filtered.filter(t => dayjs(t.startTime).year() === Number(filters.filterYear));
         if (filters.filterStatus) filtered = filtered.filter(t => t.status === filters.filterStatus);
+        if (filters.filterProject) filtered = filtered.filter(t => t.project?._id === filters.filterProject || t.project === filters.filterProject);
 
         const chronological = [...tasks].sort((a, b) => dayjs(a.createdAt).diff(dayjs(b.createdAt)));
         const idMap = new Map(chronological.map((t, i) => [t._id, `SR${i + 1}`]));
@@ -186,6 +188,7 @@ const UserDashboard = ({ mobileOpen, handleDrawerToggle }) => {
             if (sortBy === 'customer') k = t.customer?.name || 'Unknown';
             else if (sortBy === 'consultant') k = t.consultant?.name || 'Unknown';
             else if (sortBy === 'contract') k = t.contract?.contractName || 'General';
+            else if (sortBy === 'project') k = t.project?.name || 'Unknown Project';
             else if (sortBy === 'time') k = dayjs(t.startTime).format('DD MMM YYYY');
             if (!groups[k]) groups[k] = { title: k, tasks: [], total: 0 };
             groups[k].tasks.push(t);
@@ -269,12 +272,12 @@ const UserDashboard = ({ mobileOpen, handleDrawerToggle }) => {
         setFilters({
             ...filters,
             filterCustomer: '', filterConsultant: '', filterContract: '',
-            filterProduct: '', filterMonth: '', filterYear: '', filterStatus: ''
+            filterProduct: '', filterMonth: '', filterYear: '', filterStatus: '', filterProject: ''
         });
         setAnchors({ ...anchors, filterMenuAnchorEl: null });
     };
 
-    const isFilterApplied = filters.filterCustomer || filters.filterConsultant || filters.filterContract || filters.filterProduct || filters.filterMonth !== '' || filters.filterYear !== '' || filters.filterStatus;
+    const isFilterApplied = filters.filterCustomer || filters.filterConsultant || filters.filterContract || filters.filterProduct || filters.filterMonth !== '' || filters.filterYear !== '' || filters.filterStatus || filters.filterProject;
 
     const getFilteredProjects = () => {
         let filtered = [...projects];
@@ -316,6 +319,7 @@ const UserDashboard = ({ mobileOpen, handleDrawerToggle }) => {
                     getStatusColor={getStatusColor}
                     customers={customers}
                     contracts={contracts}
+                    projects={projects}
                     consultants={consultants}
                     filters={filters}
                     setFilters={setFilters}

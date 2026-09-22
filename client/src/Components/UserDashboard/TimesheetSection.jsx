@@ -59,6 +59,7 @@ const TimesheetSection = ({
     handlers,
     customers,
     contracts,
+    projects,
     consultants,
     filters,
     setFilters,
@@ -81,7 +82,8 @@ const TimesheetSection = ({
         filterProduct,
         filterStatus,
         filterMonth,
-        filterYear
+        filterYear,
+        filterProject
     } = filters;
 
     const {
@@ -105,6 +107,7 @@ const TimesheetSection = ({
             if (sortBy === 'customer') { keyA = a.customer?.name || ''; keyB = b.customer?.name || ''; }
             else if (sortBy === 'consultant') { keyA = a.consultant?.name || ''; keyB = b.consultant?.name || ''; }
             else if (sortBy === 'contract') { keyA = a.contract?.contractName || ''; keyB = b.contract?.contractName || ''; }
+            else if (sortBy === 'project') { keyA = a.project?.name || ''; keyB = b.project?.name || ''; }
             else if (sortBy === 'time') {
                 return dayjs(b.startTime).diff(dayjs(a.startTime));
             }
@@ -130,6 +133,7 @@ const TimesheetSection = ({
             if (sortBy === 'customer') k = t.customer?.name || 'Unknown';
             else if (sortBy === 'consultant') k = t.consultant?.name || 'Unknown';
             else if (sortBy === 'contract') k = t.contract?.contractName || 'General';
+            else if (sortBy === 'project') k = t.project?.name || 'Unknown Project';
             else if (sortBy === 'time') k = dayjs(t.startTime).format('DD MMM YYYY');
 
             if (!currentGroup || currentGroup.title !== k) {
@@ -267,6 +271,18 @@ const TimesheetSection = ({
                 <TextField
                     select
                     fullWidth
+                    label="Project"
+                    size="small"
+                    value={filterProject}
+                    onChange={e => setFilters({ ...filters, filterProject: e.target.value })}
+                    sx={{ mb: 2 }}
+                >
+                    <MenuItem value="">All Projects</MenuItem>
+                    {projects && projects.map(p => <MenuItem key={p._id} value={p._id}>{p.name}</MenuItem>)}
+                </TextField>
+                <TextField
+                    select
+                    fullWidth
                     label="Product"
                     size="small"
                     value={filterProduct}
@@ -354,7 +370,7 @@ const TimesheetSection = ({
             </Menu>
 
             <Menu anchorEl={filterAnchorEl} open={Boolean(filterAnchorEl)} onClose={() => setAnchors({ ...anchors, filterAnchorEl: null })} PaperProps={{ sx: { mt: 1, borderRadius: 3, boxShadow: '0 10px 40px rgba(0,0,0,0.1)' } }}>
-                {['none', 'customer', 'consultant', 'contract', 'time'].map(m => (
+                {['none', 'customer', 'consultant', 'contract', 'project', 'time'].map(m => (
                     <MenuItem key={m} onClick={() => { setSortBy(m); setAnchors({ ...anchors, filterAnchorEl: null }); }} sx={{ fontWeight: 600, fontSize: '0.85rem', textTransform: 'capitalize' }}>
                         {m === 'none' ? 'Flat List' : `Group by ${m}`}
                     </MenuItem>
@@ -371,6 +387,7 @@ const TimesheetSection = ({
                                 <th style={{ textAlign: 'left', padding: '12px' }}>Description</th>
                                 <th style={{ textAlign: 'left', padding: '12px' }}>Start-End Period</th>
                                 <th style={{ textAlign: 'left', padding: '12px' }}>Contract</th>
+                                <th style={{ textAlign: 'left', padding: '12px' }}>Project</th>
                                 <th style={{ textAlign: 'left', padding: '12px' }}>Hours</th>
                                 <th style={{ textAlign: 'left', padding: '12px' }}>Status</th>
                                 <th style={{ textAlign: 'center', padding: '12px' }}>Actions</th>
@@ -400,6 +417,9 @@ const TimesheetSection = ({
                                     </td>
                                     <td style={{ padding: '12px' }}>
                                         <Typography variant="body2">{t.contract?.contractName || 'N/A'}</Typography>
+                                    </td>
+                                    <td style={{ padding: '12px' }}>
+                                        <Typography variant="body2">{t.project?.name || 'N/A'}</Typography>
                                     </td>
                                     <td style={{ padding: '12px' }}>
                                         <Typography variant="body2" sx={{ fontWeight: 'bold' }}>{t.timeTaken}</Typography>
