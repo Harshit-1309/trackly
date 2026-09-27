@@ -34,6 +34,8 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.PORT }}
           script: |
             cd /root/application/trackly
             git restore .
@@ -45,6 +47,8 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.PORT }}
           # Copy the entire dist folder we just built
           source: "client/dist"
           # It puts 'client/dist' inside the target folder
@@ -56,6 +60,8 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.PORT }}
           script: |
             # Sync the fresh code (frontend and backend) to Nginx's live directory
             rsync -avz /root/application/trackly/ /var/www/trackly/
